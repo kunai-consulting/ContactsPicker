@@ -7,74 +7,18 @@
 //
 
 import Foundation
-import AddressBook
-import Contacts
 
-protocol InternalAddressBook {
+public protocol InternalAddressBook {
     var personCount: Int {
         get
     }
     
     func requestAccess( completion: (Bool) -> Void );
+    
+    func addContact(contact: KunaiContact)
 }
 
-private class ABAddressBookImpl: InternalAddressBook {
-    
-    private var addressBook: ABAddressBook!
-    
-    private init() {
-        var err : Unmanaged<CFError>? = nil
-        let ab = ABAddressBookCreateWithOptions(nil, &err)
-        if err == nil {
-            addressBook = ab.takeRetainedValue()
-        }
-    }
-    
-    var personCount: Int {
-        get {
-            return ABAddressBookGetPersonCount(addressBook);
-        }
-    }
-    
-    private func requestAccess(completion: (Bool) -> Void) {
-        ABAddressBookRequestAccessWithCompletion(addressBook) {
-            (let b : Bool, c : CFError!) -> Void in
-            completion(b)
-        }
-    }
-}
-
-private class CNAddressBookImpl: InternalAddressBook {
-    
-    private var contactStore: CNContactStore!
-    
-    var personCount: Int {
-        get {
-            do {
-                let containerId = contactStore.defaultContainerIdentifier()
-                let predicate = CNContact.predicateForContactsInContainerWithIdentifier(containerId)
-                return try contactStore.unifiedContactsMatchingPredicate(predicate, keysToFetch: []).count
-            } catch let e {
-                print("\(e)")
-                return 0;
-            }
-
-        }
-    }
-    
-    private init() {
-        contactStore = CNContactStore()
-    }
-    
-    private func requestAccess(completion: (Bool) -> Void) {
-        contactStore.requestAccessForEntityType(CNEntityType.Contacts) { (access, err) -> Void in
-            completion(access)
-        }
-    }
-    
-}
-
-public class MyAddressBook {
+public class MyAddressBook: InternalAddressBook {
     private var internalAddressBook: InternalAddressBook!
     
     public var personCount : Int {
@@ -91,14 +35,18 @@ public class MyAddressBook {
             
         if isOnIOS9OrAbove {
             print("iOS >=  9.0.0")
-            internalAddressBook = CNAddressBookImpl()
+            internalAddressBook = ABAddressBookImpl()
         } else {
             print("iOS < 9")
             internalAddressBook = ABAddressBookImpl()
         }
     }
     
-    public func requestAccessWithCompletion( completion : (Bool) -> Void ) {
-        internalAddressBook.requestAccess(completion);
+    public func requestAccess(completion: (Bool) -> Void) {
+        internalAddressBook.requestAccess(completion)
+    }
+    
+    public func addContact(contact: KunaiContact) {
+        internalAddressBook.addContact(contact)
     }
 }
