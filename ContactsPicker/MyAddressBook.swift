@@ -35,7 +35,7 @@ public class MyAddressBook: InternalAddressBook {
             
         if isOnIOS9OrAbove {
             print("iOS >=  9.0.0")
-            internalAddressBook = ABAddressBookImpl()
+            internalAddressBook = CNAddressBookImpl()
         } else {
             print("iOS < 9")
             internalAddressBook = ABAddressBookImpl()
