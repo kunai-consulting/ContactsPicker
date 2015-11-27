@@ -34,14 +34,39 @@ internal class ABAddressBookImpl: InternalAddressBook {
         }
     }
     
-    func addContact(contact: KunaiContact) {
+    func addContact(contact: KunaiContact) throws {
         let adapter = ABAdapter(kunaiContact: contact)
-        let record = adapter.convertedObject?.abRecord
-        var err : Unmanaged<CFError>? = nil
+        let record = adapter.convertedObject
     
-        var success = ABAddressBookAddRecord(addressBook, record, &err)
-        print(success)
-        ABAddressBookSave(addressBook, &err)
+        ABAddressBookAddRecord(addressBook, record, nil)
+        
+       if let err = save() {
+            throw err
+        }
+
+    }
+    
+    internal func save() -> NSError? {
+        return errorIfNoSuccess {
+            ABAddressBookSave(self.addressBook, $0)
+        }
+    }
+    
+    func errorIfNoSuccess(call : (UnsafeMutablePointer<Unmanaged<CFError>?>) -> Bool) -> NSError? {
+        var err : Unmanaged<CFError>? = nil
+        let success : Bool = call(&err)
+        if success {
+            return nil
+        }
+        else {
+            if let error = err {
+                let cfError = error.takeRetainedValue()
+                let nsError: NSError? = cfError as NSError?
+                return nsError
+            } else {
+                return nil
+            }
+        }
     }
 }
 
@@ -53,7 +78,7 @@ internal class ABRecordWrapper {
     }
 }
 
-internal class ABAdapter: KunaiContactAdapter<ABRecordWrapper> {
+internal class ABAdapter: KunaiContactAdapter<ABRecord> {
     
     override var mappings: [String:String] {
         get {
@@ -68,9 +93,9 @@ internal class ABAdapter: KunaiContactAdapter<ABRecordWrapper> {
         }
     }
     
-    override var convertedObject: ABRecordWrapper? {
+    override var convertedObject: ABRecord? {
         get {
-            return ABRecordWrapper(abRecord: toABRecordRef())
+            return toABRecordRef()
         }
     }
     
@@ -82,8 +107,8 @@ internal class ABAdapter: KunaiContactAdapter<ABRecordWrapper> {
         let person = ABPersonCreate().takeRetainedValue()
         
         if let phoneNumbers = kunaiContact.phoneNumbers {
-            let phoneNumberMultiValue: ABMutableMultiValue = ABMultiValueCreateMutable(ABPersonGetTypeOfProperty(kABPersonPhoneProperty)).takeRetainedValue()
-            
+            let phoneNumberMultiValue = createMultiValue(kABPersonPhoneProperty)
+
             for var phoneNumberLabeledValue in phoneNumbers {
                 ABMultiValueAddValueAndLabel(phoneNumberMultiValue, phoneNumberLabeledValue.value, convertLabel(phoneNumberLabeledValue.label), nil)
             }
@@ -91,7 +116,13 @@ internal class ABAdapter: KunaiContactAdapter<ABRecordWrapper> {
         }
         
         if let emailAddresses = kunaiContact.emailAddresses {
-            // TODO
+            let emailAddressesMultiValue = createMultiValue(kABPersonEmailProperty)
+            
+            for var emailLabeledValue in emailAddresses {
+                ABMultiValueAddValueAndLabel(emailAddressesMultiValue, emailLabeledValue.value, convertLabel(emailLabeledValue.label), nil)
+            }
+            
+            setValueToRecord(person, key: kABPersonEmailProperty, emailAddressesMultiValue)
         }
         
         if let firstName = kunaiContact.firstName {
@@ -105,8 +136,11 @@ internal class ABAdapter: KunaiContactAdapter<ABRecordWrapper> {
         return person
     }
     
+    private func createMultiValue(type: ABPropertyID) -> ABMutableMultiValue {
+        return ABMultiValueCreateMutable(ABPersonGetTypeOfProperty(type)).takeRetainedValue()
+    }
+    
     private func setValueToRecord<T : AnyObject>(record : ABRecord!, key : ABPropertyID, _ value : T?) {
         ABRecordSetValue(record, key, value, nil)
     }
-
 }

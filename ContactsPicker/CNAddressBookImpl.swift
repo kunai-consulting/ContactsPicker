@@ -37,19 +37,14 @@ internal class CNAddressBookImpl: InternalAddressBook {
         }
     }
     
-    func addContact(contact: KunaiContact) {
+    func addContact(contact: KunaiContact) throws {
         let adapter = CNAdapter(kunaiContact:contact)
         let cnContact = adapter.toCNContact()
         
         let request = CNSaveRequest()
         request.addContact(cnContact, toContainerWithIdentifier: nil)
         
-        do {
-           try contactStore.executeSaveRequest(request)
-        }
-        catch let e{
-            print(e)
-        }
+        try self.contactStore.executeSaveRequest(request)
     }
 }
 

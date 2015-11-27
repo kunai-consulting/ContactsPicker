@@ -13,9 +13,9 @@ public protocol InternalAddressBook {
         get
     }
     
-    func requestAccess( completion: (Bool) -> Void );
+    func requestAccess( completion: (Bool) -> Void )
     
-    func addContact(contact: KunaiContact)
+    func addContact(contact: KunaiContact) throws
 }
 
 public class MyAddressBook: InternalAddressBook {
@@ -46,7 +46,7 @@ public class MyAddressBook: InternalAddressBook {
         internalAddressBook.requestAccess(completion)
     }
     
-    public func addContact(contact: KunaiContact) {
-        internalAddressBook.addContact(contact)
+    public func addContact(contact: KunaiContact) throws {
+        try internalAddressBook.addContact(contact)
     }
 }
