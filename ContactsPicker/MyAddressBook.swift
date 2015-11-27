@@ -15,7 +15,13 @@ public protocol InternalAddressBook {
     
     func requestAccess( completion: (Bool) -> Void )
     
-    func addContact(contact: KunaiContact) throws
+    func addContact(contact: KunaiContact)
+    
+    func deleteContactWithIdentifier(identifier: String?)
+    
+    func findContactWithIdentifier(identifier: String?) -> KunaiContact?
+    
+    func commitChanges() throws
 }
 
 public class MyAddressBook: InternalAddressBook {
@@ -46,7 +52,19 @@ public class MyAddressBook: InternalAddressBook {
         internalAddressBook.requestAccess(completion)
     }
     
-    public func addContact(contact: KunaiContact) throws {
-        try internalAddressBook.addContact(contact)
+    public func addContact(contact: KunaiContact) {
+        internalAddressBook.addContact(contact)
+    }
+    
+    public func deleteContactWithIdentifier(identifier: String?) {
+        internalAddressBook.deleteContactWithIdentifier(identifier)
+    }
+    
+    public func commitChanges() throws {
+        try internalAddressBook.commitChanges()
+    }
+    
+    public func findContactWithIdentifier(identifier: String?) -> KunaiContact? {
+        return internalAddressBook.findContactWithIdentifier(identifier)
     }
 }

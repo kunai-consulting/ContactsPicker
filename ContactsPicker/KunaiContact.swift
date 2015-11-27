@@ -10,6 +10,7 @@ import Foundation
 import Contacts
 import AddressBook
 
+private let IdentifierKey = "identifier"
 private let FirstNameKey = "firstName"
 private let LastNameKey = "lastName"
 private let PhoneNumbersKey = "phoneNumbers"
@@ -38,6 +39,22 @@ public class KunaiLabeledValue {
 public class KunaiContact {
     
     private var properties = [String: AnyObject]()
+    
+    internal var identifierGetter: (() -> String?)?
+    
+    public var identifier: String? {
+        set {
+            properties[IdentifierKey] = newValue
+        }
+
+        get {
+            if let getter = identifierGetter {
+                return getter()
+            }
+            
+            return properties[IdentifierKey] as? String
+        }
+    }
     
     public var firstName: String? {
         set {
@@ -97,24 +114,12 @@ public class KunaiContact {
     
 }
 
-internal class KunaiContactAdapter<T> {
-    
-    internal let kunaiContact: KunaiContact
+internal class BaseAdapter {
     
     internal var mappings: [String:String] {
         get {
             return [String:String]()
         }
-    }
-    
-    internal var convertedObject: T? {
-        get {
-            return nil
-        }
-    }
-    
-    internal init(kunaiContact: KunaiContact) {
-        self.kunaiContact = kunaiContact
     }
     
     internal func convertLabel(label: String?) -> String? {
@@ -128,5 +133,46 @@ internal class KunaiContactAdapter<T> {
             return label
         }
     }
+}
+
+internal class KunaiContactAdapter<T> : BaseAdapter {
     
+    internal let kunaiContact: KunaiContact
+    
+    internal var convertedObject: T? {
+        get {
+            return nil
+        }
+    }
+    
+    internal init(kunaiContact: KunaiContact) {
+        self.kunaiContact = kunaiContact
+    }
+}
+
+internal class InternalContactAdapter<T> : BaseAdapter {
+    
+    internal let internalContact: T
+    
+    internal init(internalContact: T) {
+        self.internalContact = internalContact
+    }
+    
+    internal var convertedToKunaiContact: KunaiContact? {
+        get {
+            return nil
+        }
+    }
+}
+
+extension Dictionary {
+    var reversedDictionary: Dictionary {
+        get {
+            var reversedDictionary = [Key:Value]()
+            for (key, value) in self {
+                reversedDictionary[value as! Key] = key as! Value
+            }
+            return reversedDictionary
+        }
+    }
 }

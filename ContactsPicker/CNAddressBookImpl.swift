@@ -9,9 +9,19 @@
 import Foundation
 import Contacts
 
+let cnMappings = [
+    KunaiLabeledValue.LabelMain : CNLabelPhoneNumberMain,
+    KunaiLabeledValue.LabelHome : CNLabelHome,
+    KunaiLabeledValue.LabelWork : CNLabelWork,
+    KunaiLabeledValue.LabelOther : CNLabelOther,
+    KunaiLabeledValue.LabelPhoneiPhone : CNLabelPhoneNumberiPhone,
+    KunaiLabeledValue.LabelPhoneMobile : CNLabelPhoneNumberMobile
+]
+
 internal class CNAddressBookImpl: InternalAddressBook {
     
     private var contactStore: CNContactStore!
+    private var saveRequest: CNSaveRequest = CNSaveRequest()
     
     var personCount: Int {
         get {
@@ -37,14 +47,95 @@ internal class CNAddressBookImpl: InternalAddressBook {
         }
     }
     
-    func addContact(contact: KunaiContact) throws {
+    func addContact(contact: KunaiContact) {
         let adapter = CNAdapter(kunaiContact:contact)
         let cnContact = adapter.toCNContact()
+        saveRequest.addContact(cnContact, toContainerWithIdentifier: nil)
+        contact.identifier = cnContact.identifier
+    }
+    
+    func findContactWithIdentifier(identifier: String?) -> KunaiContact? {
+        guard let id = identifier else {
+            return nil
+        }
+
+        do {
+            let contact = try contactStore.unifiedContactWithIdentifier(id, keysToFetch: [
+                    CNContactGivenNameKey,
+                    CNContactFamilyNameKey,
+                    CNContactEmailAddressesKey,
+                    CNContactPhoneNumbersKey,
+                    CNContactIdentifierKey
+                ])
+            let adapter = CNKunaiContactAdapter(internalContact: contact)
+            return adapter.convertedToKunaiContact
+            
+        } catch {
+            return nil
+        }
+
+    }
+    
+    func deleteContactWithIdentifier(identifier: String?) {
+        guard let id = identifier else {
+            return
+        }
         
-        let request = CNSaveRequest()
-        request.addContact(cnContact, toContainerWithIdentifier: nil)
+        do {
+            let contact = try contactStore.unifiedContactWithIdentifier(id, keysToFetch: [CNContactIdentifierKey])
+            saveRequest.deleteContact(contact.mutableCopy() as! CNMutableContact)
+        } catch {
+            // ??
+        }
+    }
+    
+    func commitChanges() throws {
+        try contactStore.executeSaveRequest(saveRequest)
+        saveRequest = CNSaveRequest()
+    }
+}
+
+private class CNKunaiContactAdapter : InternalContactAdapter<CNContact> {
+    
+    override var mappings: [String:String] {
+        get {
+            return cnMappings.reversedDictionary
+        }
+    }
+    
+    override var convertedToKunaiContact: KunaiContact? {
+        get {
+            return toKunaiContact()
+        }
+    }
+    
+    private override init(internalContact: CNContact) {
+        super.init(internalContact: internalContact)
+    }
+    
+    private func toKunaiContact() -> KunaiContact {
+        let cnContact = internalContact
+        let kunaiContact = KunaiContact()
+        kunaiContact.firstName = cnContact.givenName
+        kunaiContact.lastName = cnContact.familyName
+        kunaiContact.phoneNumbers = convertCNLabeledValues(cnContact.phoneNumbers)
+        kunaiContact.emailAddresses = convertCNLabeledValues(cnContact.emailAddresses)
         
-        try self.contactStore.executeSaveRequest(request)
+        kunaiContact.identifier = cnContact.identifier
+        return kunaiContact
+    }
+    
+    private func convertCNLabeledValues(cnLabeledValues: [CNLabeledValue]) -> [KunaiLabeledValue] {
+        var kunaiLabels = [KunaiLabeledValue]()
+        
+        for cnLabeledValue in cnLabeledValues {
+            kunaiLabels.append(
+                KunaiLabeledValue(
+                    label: convertLabel(cnLabeledValue.label),
+                    value: cnLabeledValue.value))
+        }
+        
+        return kunaiLabels
     }
 }
 
@@ -52,14 +143,7 @@ private class CNAdapter : KunaiContactAdapter<CNMutableContact>{
     
     override var mappings: [String:String] {
         get {
-            return [
-                KunaiLabeledValue.LabelMain : CNLabelPhoneNumberMain,
-                KunaiLabeledValue.LabelHome : CNLabelHome,
-                KunaiLabeledValue.LabelWork : CNLabelWork,
-                KunaiLabeledValue.LabelOther : CNLabelOther,
-                KunaiLabeledValue.LabelPhoneiPhone : CNLabelPhoneNumberiPhone,
-                KunaiLabeledValue.LabelPhoneMobile : CNLabelPhoneNumberMobile
-            ]
+            return cnMappings
         }
     }
     
@@ -69,7 +153,7 @@ private class CNAdapter : KunaiContactAdapter<CNMutableContact>{
         }
     }
     
-    internal override init(kunaiContact: KunaiContact) {
+    private override init(kunaiContact: KunaiContact) {
         super.init(kunaiContact: kunaiContact)
     }
     
