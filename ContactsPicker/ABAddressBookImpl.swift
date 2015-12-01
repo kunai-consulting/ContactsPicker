@@ -69,6 +69,18 @@ internal class ABAddressBookImpl: InternalAddressBook {
         ABAddressBookRemoveRecord(addressBook, record, nil)
     }
     
+    func deleteAllContacts() {
+        let allPeople = ABAddressBookCopyArrayOfAllPeople(addressBook).takeRetainedValue()
+        let allRecordsArray = allPeople as NSArray? as? [ABRecord]
+        
+        if let allRecords = allRecordsArray {
+            for var person in allRecords {
+                ABAddressBookRemoveRecord(addressBook, person, nil)
+            }
+        }
+
+    }
+    
     func findContactWithIdentifier(identifier: String?) -> KunaiContact? {
         
         guard let id = identifier else {
@@ -76,9 +88,13 @@ internal class ABAddressBookImpl: InternalAddressBook {
         }
         
         if let recordID = Int32(id) {
-            let record = ABAddressBookGetPersonWithRecordID(addressBook, recordID).takeUnretainedValue()
-            let adapter = ABKunaiContactAdapter(internalContact: record)
-            return adapter.convertedToKunaiContact
+            if let record = ABAddressBookGetPersonWithRecordID(addressBook, recordID)?.takeUnretainedValue() {
+                let adapter = ABKunaiContactAdapter(internalContact: record)
+                return adapter.convertedToKunaiContact
+            } else {
+                return nil
+            }
+
         } else {
             return nil
         }

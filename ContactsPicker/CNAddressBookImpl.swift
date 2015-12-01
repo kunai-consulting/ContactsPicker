@@ -89,6 +89,21 @@ internal class CNAddressBookImpl: InternalAddressBook {
         }
     }
     
+    func deleteAllContacts() {
+        let containerId = contactStore.defaultContainerIdentifier()
+        let predicate = CNContact.predicateForContactsInContainerWithIdentifier(containerId)
+        let keys = [CNContactIdentifierKey]
+        do {
+            let allContacts = try contactStore.unifiedContactsMatchingPredicate(predicate, keysToFetch: keys)
+            for var contact in allContacts {
+                saveRequest.deleteContact(contact.mutableCopy() as! CNMutableContact)
+            }
+        } catch let e {
+            print(e)
+        }
+        
+    }
+    
     func commitChanges() throws {
         try contactStore.executeSaveRequest(saveRequest)
         saveRequest = CNSaveRequest()
