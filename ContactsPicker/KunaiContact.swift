@@ -17,6 +17,35 @@ private let PhoneNumbersKey = "phoneNumbers"
 private let EmailAddressesKey = "emails"
 private let OrganizationKey = "organization"
 
+public protocol ContactToInsert {
+    
+    var firstName: String? {
+        get set
+    }
+    
+    var lastName: String? {
+        get set
+    }
+    
+    var phoneNumbers: [KunaiLabeledValue]? {
+        get set
+    }
+    
+    var emailAddresses: [KunaiLabeledValue]? {
+        get set
+    }
+    
+    var organizationName: String? {
+        get set
+    }
+}
+
+public protocol AlreadySavedContact : ContactToInsert {
+    var identifier: String? {
+        get
+    }
+}
+
 public class KunaiLabeledValue {
     
     public static let LabelMain = "LabelMain"
@@ -36,7 +65,7 @@ public class KunaiLabeledValue {
 
 }
 
-public class KunaiContact {
+public class KunaiContact: ContactToInsert {
     
     private var properties = [String: AnyObject]()
     
@@ -112,67 +141,4 @@ public class KunaiContact {
         phoneNumbers = [KunaiLabeledValue]()
     }
     
-}
-
-internal class BaseAdapter {
-    
-    internal var mappings: [String:String] {
-        get {
-            return [String:String]()
-        }
-    }
-    
-    internal func convertLabel(label: String?) -> String? {
-        guard let label = label else {
-            return nil
-        }
-        
-        if mappings.keys.contains(label) {
-            return mappings[label]
-        } else {
-            return label
-        }
-    }
-}
-
-internal class KunaiContactAdapter<T> : BaseAdapter {
-    
-    internal let kunaiContact: KunaiContact
-    
-    internal var convertedObject: T? {
-        get {
-            return nil
-        }
-    }
-    
-    internal init(kunaiContact: KunaiContact) {
-        self.kunaiContact = kunaiContact
-    }
-}
-
-internal class InternalContactAdapter<T> : BaseAdapter {
-    
-    internal let internalContact: T
-    
-    internal init(internalContact: T) {
-        self.internalContact = internalContact
-    }
-    
-    internal var convertedToKunaiContact: KunaiContact? {
-        get {
-            return nil
-        }
-    }
-}
-
-extension Dictionary {
-    var reversedDictionary: Dictionary {
-        get {
-            var reversedDictionary = [Key:Value]()
-            for (key, value) in self {
-                reversedDictionary[value as! Key] = key as! Value
-            }
-            return reversedDictionary
-        }
-    }
 }

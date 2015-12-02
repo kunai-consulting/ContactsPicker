@@ -15,13 +15,15 @@ public protocol InternalAddressBook {
     
     func requestAccess( completion: (Bool) -> Void )
     
-    func addContact(contact: KunaiContact)
+    func addContact(contact: ContactToInsert) -> AlreadySavedContact
+    
+    func updateContact(contact: AlreadySavedContact)
     
     func deleteAllContacts()
     
     func deleteContactWithIdentifier(identifier: String?)
     
-    func findContactWithIdentifier(identifier: String?) -> KunaiContact?
+    func findContactWithIdentifier(identifier: String?) -> AlreadySavedContact?
     
     func commitChanges() throws
 }
@@ -61,7 +63,6 @@ public class MyAddressBook: InternalAddressBook {
     }
     
     public init(factory: InternalAddressBookFactory) {
-        
         internalAddressBook = factory.createInternalAddressBook()
     }
     
@@ -69,8 +70,12 @@ public class MyAddressBook: InternalAddressBook {
         internalAddressBook.requestAccess(completion)
     }
     
-    public func addContact(contact: KunaiContact) {
-        internalAddressBook.addContact(contact)
+    public func addContact(contact: ContactToInsert) -> AlreadySavedContact {
+        return internalAddressBook.addContact(contact)
+    }
+    
+    public func updateContact(contact: AlreadySavedContact) {
+        internalAddressBook.updateContact(contact)
     }
     
     public func deleteContactWithIdentifier(identifier: String?) {
@@ -85,7 +90,7 @@ public class MyAddressBook: InternalAddressBook {
         try internalAddressBook.commitChanges()
     }
     
-    public func findContactWithIdentifier(identifier: String?) -> KunaiContact? {
+    public func findContactWithIdentifier(identifier: String?) -> AlreadySavedContact? {
         return internalAddressBook.findContactWithIdentifier(identifier)
     }
 }

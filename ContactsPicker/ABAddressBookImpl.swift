@@ -9,14 +9,7 @@
 import Foundation
 import AddressBook
 
-let abMappings = [
-    KunaiLabeledValue.LabelMain : kABPersonPhoneMainLabel as String,
-    KunaiLabeledValue.LabelHome : kABPersonHomePageLabel as String,
-    KunaiLabeledValue.LabelWork : kABWorkLabel as String,
-    KunaiLabeledValue.LabelOther : kABOtherLabel as String,
-    KunaiLabeledValue.LabelPhoneiPhone : kABPersonPhoneIPhoneLabel as String,
-    KunaiLabeledValue.LabelPhoneMobile : kABPersonPhoneMobileLabel as String
-]
+
 
 internal class ABAddressBookImpl: InternalAddressBook {
     
@@ -43,16 +36,14 @@ internal class ABAddressBookImpl: InternalAddressBook {
         }
     }
     
-    func addContact(contact: KunaiContact) {
-        let adapter = ABRecordAdapter(kunaiContact: contact)
-        let record = adapter.convertedObject
-    
+    func addContact(contact: ContactToInsert) -> AlreadySavedContact {
+        let record = ABRecordAdapter.toABRecordRef(contact)
         ABAddressBookAddRecord(addressBook, record, nil)
-        // record id isn't available before saving changes - how to handle that?
-        let recordID = String(ABRecordGetRecordID(record))
-        contact.identifierGetter = {
-            return String(ABRecordGetRecordID(record))
-        }
+        return ABContactRecord(abRecord: record)
+    }
+    
+    func updateContact(contact: AlreadySavedContact) {
+        
     }
     
     func deleteContactWithIdentifier(identifier: String?) {
@@ -81,7 +72,7 @@ internal class ABAddressBookImpl: InternalAddressBook {
 
     }
     
-    func findContactWithIdentifier(identifier: String?) -> KunaiContact? {
+    func findContactWithIdentifier(identifier: String?) -> AlreadySavedContact? {
         
         guard let id = identifier else {
             return nil
@@ -89,8 +80,7 @@ internal class ABAddressBookImpl: InternalAddressBook {
         
         if let recordID = Int32(id) {
             if let record = ABAddressBookGetPersonWithRecordID(addressBook, recordID)?.takeUnretainedValue() {
-                let adapter = ABKunaiContactAdapter(internalContact: record)
-                return adapter.convertedToKunaiContact
+                return ABContactRecord(abRecord: record)
             } else {
                 return nil
             }
@@ -102,13 +92,14 @@ internal class ABAddressBookImpl: InternalAddressBook {
     
     func commitChanges() throws {
         if let err = save() {
+            print("commit error: \(err.localizedDescription)")
             throw err
         }
     }
     
     internal func save() -> NSError? {
         return errorIfNoSuccess {
-            ABAddressBookSave(self.addressBook, $0)
+            return ABAddressBookSave(self.addressBook, $0)
         }
     }
     
@@ -130,112 +121,4 @@ internal class ABAddressBookImpl: InternalAddressBook {
     }
 }
 
-internal class ABKunaiContactAdapter : InternalContactAdapter<ABRecord> {
-    override var mappings: [String:String] {
-        get {
-            return abMappings.reversedDictionary
-        }
-    }
-    
-    override var convertedToKunaiContact: KunaiContact? {
-        get {
-            return toKunaiContact()
-        }
-    }
-    
-    private override init(internalContact: ABRecord) {
-        super.init(internalContact: internalContact)
-    }
-    
-    private func toKunaiContact() -> KunaiContact {
-        let abRecord = internalContact
-        let kunaiContact = KunaiContact()
-        kunaiContact.firstName = getPropertyFromRecord(abRecord, propertyName: kABPersonFirstNameProperty)
-        kunaiContact.lastName = getPropertyFromRecord(abRecord, propertyName: kABPersonLastNameProperty)
-        kunaiContact.phoneNumbers = getMultiValues(abRecord, propertyName: kABPersonPhoneProperty)
-        kunaiContact.emailAddresses = getMultiValues(abRecord, propertyName:  kABPersonEmailProperty)
-        kunaiContact.identifier = String(ABRecordGetRecordID(abRecord))
-        return kunaiContact
-    }
-    
-    private func getPropertyFromRecord<T>(record: ABRecord, propertyName : ABPropertyID) -> T? {
-        let value: AnyObject? = ABRecordCopyValue(record, propertyName)?.takeRetainedValue()
-        return value as? T
-    }
-    
-    private func getMultiValues(record: ABRecord, propertyName : ABPropertyID) -> [KunaiLabeledValue] {
-        var array = [KunaiLabeledValue]()
-        let multivalue : ABMultiValue? = getPropertyFromRecord(record, propertyName: propertyName)
-        for i : Int in 0..<(ABMultiValueGetCount(multivalue)) {
-            let value = ABMultiValueCopyValueAtIndex(multivalue, i).takeRetainedValue() as? String
-            if let v = value {
-                let id : Int = Int(ABMultiValueGetIdentifierAtIndex(multivalue, i))
-                let optionalLabel = ABMultiValueCopyLabelAtIndex(multivalue, i)?.takeRetainedValue() as? String
-                array.append(
-                    KunaiLabeledValue(label: convertLabel(optionalLabel), value: v)
-                )
-            }
-        }
-        return array
-    }
-}
 
-internal class ABRecordAdapter: KunaiContactAdapter<ABRecord> {
-    
-    override var mappings: [String:String] {
-        get {
-            return abMappings
-        }
-    }
-    
-    override var convertedObject: ABRecord? {
-        get {
-            return toABRecordRef()
-        }
-    }
-    
-    internal override init(kunaiContact: KunaiContact) {
-        super.init(kunaiContact: kunaiContact)
-    }
-    
-    internal func toABRecordRef() -> ABRecord {
-        let person = ABPersonCreate().takeRetainedValue()
-        
-        if let phoneNumbers = kunaiContact.phoneNumbers {
-            let phoneNumberMultiValue = createMultiValue(kABPersonPhoneProperty)
-
-            for var phoneNumberLabeledValue in phoneNumbers {
-                ABMultiValueAddValueAndLabel(phoneNumberMultiValue, phoneNumberLabeledValue.value, convertLabel(phoneNumberLabeledValue.label), nil)
-            }
-            setValueToRecord(person, key: kABPersonPhoneProperty, phoneNumberMultiValue)
-        }
-        
-        if let emailAddresses = kunaiContact.emailAddresses {
-            let emailAddressesMultiValue = createMultiValue(kABPersonEmailProperty)
-            
-            for var emailLabeledValue in emailAddresses {
-                ABMultiValueAddValueAndLabel(emailAddressesMultiValue, emailLabeledValue.value, convertLabel(emailLabeledValue.label), nil)
-            }
-            
-            setValueToRecord(person, key: kABPersonEmailProperty, emailAddressesMultiValue)
-        }
-        
-        if let firstName = kunaiContact.firstName {
-            setValueToRecord(person, key: kABPersonFirstNameProperty, firstName as NSString)
-        }
-        
-        if let familyName = kunaiContact.lastName {
-            setValueToRecord(person, key: kABPersonLastNameProperty, familyName as NSString)
-        }
-        
-        return person
-    }
-    
-    private func createMultiValue(type: ABPropertyID) -> ABMutableMultiValue {
-        return ABMultiValueCreateMutable(ABPersonGetTypeOfProperty(type)).takeRetainedValue()
-    }
-    
-    private func setValueToRecord<T : AnyObject>(record : ABRecord!, key : ABPropertyID, _ value : T?) {
-        ABRecordSetValue(record, key, value, nil)
-    }
-}

@@ -10,7 +10,6 @@ import XCTest
 @testable import ContactsPicker
 import JPSimulatorHacks
 
-// TODO: Skip tests from here and only call CNAddressBookTest & ABAddressBookTest suites ?
 public class ContactsPickerBaseTest : XCTestCase {
     
     internal var addressBook: MyAddressBook!
@@ -21,10 +20,18 @@ public class ContactsPickerBaseTest : XCTestCase {
         }
     }
     
+    // call CNAddressBookTest & ABAddressBookTest suites only
+    override public func performTest(run: XCTestRun) {
+        if self.dynamicType != ContactsPickerBaseTest.self {
+            super.performTest(run)
+        }
+    }
+    
     override public func setUp() {
         super.setUp()
         addressBook = MyAddressBook(factory: factory)
         JPSimulatorHacks.grantAccessToAddressBook()
+        requestAccess()
     }
     
     override public func tearDown() {
@@ -35,7 +42,7 @@ public class ContactsPickerBaseTest : XCTestCase {
         }
     }
     
-    func testAddressBookAccess() {
+    func requestAccess() {
         let expectation = self.expectationWithDescription("request access")
 
         addressBook.requestAccess { (access) -> Void in
@@ -51,7 +58,22 @@ public class ContactsPickerBaseTest : XCTestCase {
         let contact = addTestContact()
         commitChanges()
         XCTAssertEqual(numberOfContacts + 1, addressBook.personCount)
-        XCTAssertNotNil(addressBook.findContactWithIdentifier(contact.identifier))
+        
+        let savedContact = addressBook.findContactWithIdentifier(contact.identifier)
+        XCTAssertNotNil(savedContact)
+        XCTAssertEqual(contact.firstName, savedContact?.firstName)
+        XCTAssertEqual(contact.lastName, savedContact?.lastName)
+        
+    }
+    
+    func testUpdatingContact() {
+        let contact = addTestContact()
+        commitChanges()
+        var savedContact = addressBook.findContactWithIdentifier(contact.identifier)
+        savedContact!.firstName = "NewName"
+        addressBook.updateContact(savedContact!)
+        commitChanges()
+        XCTAssertEqual("NewName", addressBook.findContactWithIdentifier(contact.identifier)?.firstName)
     }
     
     func testDeletingContact() {
@@ -65,12 +87,11 @@ public class ContactsPickerBaseTest : XCTestCase {
 }
 
 internal extension ContactsPickerBaseTest {
-    func addTestContact() -> KunaiContact {
+    func addTestContact() -> AlreadySavedContact {
         let contact = KunaiContact()
         contact.firstName = "A"
         contact.lastName = "B"
-        addressBook.addContact(contact)
-        return contact
+        return addressBook.addContact(contact)
     }
     
     func commitChanges() {
