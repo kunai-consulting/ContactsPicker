@@ -69,21 +69,6 @@ public class KunaiContact: ContactToInsert {
     
     private var properties = [String: AnyObject]()
     
-    internal var identifierGetter: (() -> String?)?
-    
-    public var identifier: String? {
-        set {
-            properties[IdentifierKey] = newValue
-        }
-
-        get {
-            if let getter = identifierGetter {
-                return getter()
-            }
-            
-            return properties[IdentifierKey] as? String
-        }
-    }
     
     public var firstName: String? {
         set {
