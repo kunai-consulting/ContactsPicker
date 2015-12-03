@@ -1,5 +1,4 @@
 //
-//  KunaiContact.swift
 //  ContactsPicker
 //
 //  Created by Piotr on 24/11/15.

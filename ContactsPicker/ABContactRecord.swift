@@ -91,10 +91,10 @@ internal class ABContactRecord: FetchedContactValues {
 
 internal class ABRecordAdapter {
     
-    internal class func toABRecordRef(kunaiContact: ContactValues) -> ABRecord {
+    internal class func convertContactValuesToABRecord(contact: ContactValues) -> ABRecord {
         let person = ABPersonCreate().takeRetainedValue()
         
-        if let phoneNumbers = kunaiContact.phoneNumbers {
+        if let phoneNumbers = contact.phoneNumbers {
             let phoneNumberMultiValue = createMultiValue(kABPersonPhoneProperty)
             
             for var phoneNumberLabeledValue in phoneNumbers {
@@ -103,7 +103,7 @@ internal class ABRecordAdapter {
             setValueToRecord(person, key: kABPersonPhoneProperty, phoneNumberMultiValue)
         }
         
-        if let emailAddresses = kunaiContact.emailAddresses {
+        if let emailAddresses = contact.emailAddresses {
             let emailAddressesMultiValue = createMultiValue(kABPersonEmailProperty)
             
             for var emailLabeledValue in emailAddresses {
@@ -113,11 +113,11 @@ internal class ABRecordAdapter {
             setValueToRecord(person, key: kABPersonEmailProperty, emailAddressesMultiValue)
         }
         
-        if let firstName = kunaiContact.firstName {
+        if let firstName = contact.firstName {
             setValueToRecord(person, key: kABPersonFirstNameProperty, firstName as NSString)
         }
         
-        if let familyName = kunaiContact.lastName {
+        if let familyName = contact.lastName {
             setValueToRecord(person, key: kABPersonLastNameProperty, familyName as NSString)
         }
         

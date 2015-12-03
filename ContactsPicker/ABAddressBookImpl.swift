@@ -43,7 +43,7 @@ internal class ABAddressBookImpl: InternalAddressBook {
     
     
     func addContact(contact: ContactValues) throws -> FetchedContactValues {
-        let record = ABRecordAdapter.toABRecordRef(contact)
+        let record = ABRecordAdapter.convertContactValuesToABRecord(contact)
         
         if let error = (errorIfNoSuccess({
             ABAddressBookAddRecord(self.addressBook, record, $0)

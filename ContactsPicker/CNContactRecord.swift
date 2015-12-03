@@ -99,22 +99,22 @@ internal class CNContactRecord: FetchedContactValues {
 @available(iOS 9.0, *)
 internal class CNAdapter {
     
-    internal class func convertKunaiContact(kunaiContact: ContactValues) -> CNMutableContact {
+    internal class func convertContactValuesToCNContact(contact: ContactValues) -> CNMutableContact {
         let cnContact = CNMutableContact()
-        if let firstName = kunaiContact.firstName {
+        if let firstName = contact.firstName {
              cnContact.givenName = firstName
         }
         
-        if let lastName = kunaiContact.lastName {
+        if let lastName = contact.lastName {
             cnContact.familyName = lastName
         }
         
-        if let organizationName = kunaiContact.organizationName {
+        if let organizationName = contact.organizationName {
             cnContact.organizationName = organizationName
         }
        
-        cnContact.phoneNumbers = convertPhoneNumbers(kunaiContact.phoneNumbers)
-        cnContact.emailAddresses = convertEmailAddresses(kunaiContact.emailAddresses)
+        cnContact.phoneNumbers = convertPhoneNumbers(contact.phoneNumbers)
+        cnContact.emailAddresses = convertEmailAddresses(contact.emailAddresses)
         
         return cnContact
     }

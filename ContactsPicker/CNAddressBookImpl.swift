@@ -32,7 +32,7 @@ internal class CNAddressBookImpl: InternalAddressBook {
     }
     
     func addContact(contact: ContactValues) throws -> FetchedContactValues {
-        let cnContact = CNAdapter.convertKunaiContact(contact)
+        let cnContact = CNAdapter.convertContactValuesToCNContact(contact)
         saveRequest.addContact(cnContact, toContainerWithIdentifier: nil)
         return CNContactRecord(cnContact: cnContact)
     }
