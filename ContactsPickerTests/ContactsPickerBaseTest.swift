@@ -29,15 +29,19 @@ public class ContactsPickerBaseTest : XCTestCase {
     
     override public func setUp() {
         super.setUp()
-        addressBook = MyAddressBook(factory: factory)
+        XCTempAssertNoThrowError { () -> () in
+            self.addressBook = try MyAddressBook(factory: self.factory)
+        }
+        
         JPSimulatorHacks.grantAccessToAddressBook()
         requestAccess()
     }
     
     override public func tearDown() {
         super.tearDown()
-        addressBook.deleteAllContacts()
+
         XCTempAssertNoThrowError{
+            try self.addressBook.deleteAllContacts()
             try self.addressBook.commitChanges()
         }
     }
@@ -45,19 +49,19 @@ public class ContactsPickerBaseTest : XCTestCase {
     func requestAccess() {
         let expectation = self.expectationWithDescription("request access")
 
-        addressBook.requestAccess { (access) -> Void in
+        addressBook.requestAccessToAddressBook({ (access, error) -> Void in
             XCTAssertTrue(access)
             expectation.fulfill()
-        }
+        })
         
         self.waitForExpectationsWithTimeout(5.0, handler: nil)
     }
     
     func testAddingAContact() {
-        let numberOfContacts = addressBook.personCount
+        let numberOfContacts = try! addressBook.retrieveRecordsCount()
         let contact = addTestContact()
         commitChanges()
-        XCTAssertEqual(numberOfContacts + 1, addressBook.personCount)
+        XCTAssertEqual(numberOfContacts + 1, try! addressBook.retrieveRecordsCount())
         
         let savedContact = addressBook.findContactWithIdentifier(contact.identifier)
         XCTAssertNotNil(savedContact)
@@ -80,18 +84,21 @@ public class ContactsPickerBaseTest : XCTestCase {
         let contact = addTestContact()
         commitChanges()
         let id = contact.identifier
-        addressBook.deleteContactWithIdentifier(id)
+        XCTempAssertNoThrowError { () -> () in
+            try self.addressBook.deleteContactWithIdentifier(id)
+        }
+        
         commitChanges()
         XCTAssertNil(addressBook.findContactWithIdentifier(id))
     }
 }
 
 internal extension ContactsPickerBaseTest {
-    func addTestContact() -> AlreadySavedContact {
-        let contact = KunaiContact()
+    func addTestContact() -> FetchedContactValues {
+        let contact = NewContactValues()
         contact.firstName = "A"
         contact.lastName = "B"
-        return addressBook.addContact(contact)
+        return try! self.addressBook.addContact(contact)
     }
     
     func commitChanges() {

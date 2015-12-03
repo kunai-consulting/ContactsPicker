@@ -7,11 +7,24 @@
 //
 
 import UIKit
+import ContactsPicker
 
 class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        do {
+            let ab = try MyAddressBook()
+            ab.requestAccessToAddressBook{ (access, err) -> Void in
+                print("accesss")
+            }
+        } catch {
+            
+        }
+        
+        
+      
+
         // Do any additional setup after loading the view, typically from a nib.
     }
 

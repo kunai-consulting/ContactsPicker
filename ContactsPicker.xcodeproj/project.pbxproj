@@ -27,7 +27,8 @@
 		AE8B64461C033A6400A273F5 /* ContactsPicker.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AE8B643B1C033A6400A273F5 /* ContactsPicker.framework */; };
 		AE96419A1C04757B003B4A47 /* ABAddressBookImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE9641991C04757B003B4A47 /* ABAddressBookImpl.swift */; settings = {COMPILER_FLAGS = "-Wno-deprecated-declarations"; }; };
 		AE96419C1C04758B003B4A47 /* CNAddressBookImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE96419B1C04758B003B4A47 /* CNAddressBookImpl.swift */; };
-		AE96419E1C047AE9003B4A47 /* KunaiContact.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE96419D1C047AE9003B4A47 /* KunaiContact.swift */; };
+		AE96419E1C047AE9003B4A47 /* ContactValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE96419D1C047AE9003B4A47 /* ContactValues.swift */; };
+		AE9EFD1F1C106DD8004E8490 /* DictionaryUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE9EFD1E1C106DD8004E8490 /* DictionaryUtils.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,7 +75,8 @@
 		AE8B644C1C033A6400A273F5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AE9641991C04757B003B4A47 /* ABAddressBookImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ABAddressBookImpl.swift; sourceTree = "<group>"; };
 		AE96419B1C04758B003B4A47 /* CNAddressBookImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CNAddressBookImpl.swift; sourceTree = "<group>"; };
-		AE96419D1C047AE9003B4A47 /* KunaiContact.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KunaiContact.swift; sourceTree = "<group>"; };
+		AE96419D1C047AE9003B4A47 /* ContactValues.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactValues.swift; sourceTree = "<group>"; };
+		AE9EFD1E1C106DD8004E8490 /* DictionaryUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryUtils.swift; sourceTree = "<group>"; };
 		BA91285F3F29FE9B29ECA974 /* Pods_ContactsPickerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ContactsPickerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -137,28 +139,29 @@
 			path = ContactsPickerTestApp;
 			sourceTree = "<group>";
 		};
-		AE257F4E1C0F2A170026B9B1 /* AB */ = {
+		AE257F4E1C0F2A170026B9B1 /* AddressBookFramework */ = {
 			isa = PBXGroup;
 			children = (
 				AE9641991C04757B003B4A47 /* ABAddressBookImpl.swift */,
 				AE257F521C0F2A700026B9B1 /* ABContactRecord.swift */,
 			);
-			name = AB;
+			name = AddressBookFramework;
 			sourceTree = "<group>";
 		};
-		AE257F4F1C0F2A1D0026B9B1 /* CN */ = {
+		AE257F4F1C0F2A1D0026B9B1 /* ContactsFramework */ = {
 			isa = PBXGroup;
 			children = (
 				AE96419B1C04758B003B4A47 /* CNAddressBookImpl.swift */,
 				AE257F501C0F2A3B0026B9B1 /* CNContactRecord.swift */,
 			);
-			name = CN;
+			name = ContactsFramework;
 			sourceTree = "<group>";
 		};
 		AE257F541C0F2D1E0026B9B1 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
 				AE257F551C0F2D5B0026B9B1 /* CommonUtils.swift */,
+				AE9EFD1E1C106DD8004E8490 /* DictionaryUtils.swift */,
 			);
 			name = Utils;
 			sourceTree = "<group>";
@@ -191,12 +194,12 @@
 			isa = PBXGroup;
 			children = (
 				AE257F541C0F2D1E0026B9B1 /* Utils */,
-				AE257F4F1C0F2A1D0026B9B1 /* CN */,
-				AE257F4E1C0F2A170026B9B1 /* AB */,
+				AE257F4F1C0F2A1D0026B9B1 /* ContactsFramework */,
+				AE257F4E1C0F2A170026B9B1 /* AddressBookFramework */,
 				AE8B643E1C033A6400A273F5 /* ContactsPicker.h */,
 				AE8B64401C033A6400A273F5 /* Info.plist */,
 				AE13EF481C0347CA009E92E2 /* MyAddressBook.swift */,
-				AE96419D1C047AE9003B4A47 /* KunaiContact.swift */,
+				AE96419D1C047AE9003B4A47 /* ContactValues.swift */,
 			);
 			path = ContactsPicker;
 			sourceTree = "<group>";
@@ -416,12 +419,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				AE96419A1C04757B003B4A47 /* ABAddressBookImpl.swift in Sources */,
-				AE96419E1C047AE9003B4A47 /* KunaiContact.swift in Sources */,
+				AE96419E1C047AE9003B4A47 /* ContactValues.swift in Sources */,
 				AE13EF491C0347CA009E92E2 /* MyAddressBook.swift in Sources */,
 				AE257F511C0F2A3B0026B9B1 /* CNContactRecord.swift in Sources */,
 				AE257F531C0F2A700026B9B1 /* ABContactRecord.swift in Sources */,
 				AE257F561C0F2D5B0026B9B1 /* CommonUtils.swift in Sources */,
 				AE96419C1C04758B003B4A47 /* CNAddressBookImpl.swift in Sources */,
+				AE9EFD1F1C106DD8004E8490 /* DictionaryUtils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -592,6 +596,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = ContactsPicker/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.kunai.ContactsPicker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -611,6 +616,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = ContactsPicker/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.kunai.ContactsPicker;
 				PRODUCT_NAME = "$(TARGET_NAME)";

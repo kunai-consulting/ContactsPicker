@@ -9,88 +9,81 @@
 import Foundation
 
 public protocol InternalAddressBook {
-    var personCount: Int {
-        get
-    }
     
-    func requestAccess( completion: (Bool) -> Void )
+    func requestAccessToAddressBook( completion: (Bool, NSError?) -> Void )
     
-    func addContact(contact: ContactToInsert) -> AlreadySavedContact
+    func retrieveRecordsCount() throws -> Int
     
-    func updateContact(contact: AlreadySavedContact)
+    func addContact(contact: ContactValues) throws -> FetchedContactValues
     
-    func deleteAllContacts()
+    func updateContact(contact: FetchedContactValues)
     
-    func deleteContactWithIdentifier(identifier: String?)
+    func deleteAllContacts() throws
     
-    func findContactWithIdentifier(identifier: String?) -> AlreadySavedContact?
+    func deleteContactWithIdentifier(identifier: String?) throws
+    
+    func findContactWithIdentifier(identifier: String?) -> FetchedContactValues?
     
     func commitChanges() throws
 }
 
 public protocol InternalAddressBookFactory {
-    func createInternalAddressBook() -> InternalAddressBook
+    func createInternalAddressBook() throws -> InternalAddressBook
 }
 
 public class APIVersionAddressBookFactory : InternalAddressBookFactory {
     
-    public func createInternalAddressBook() -> InternalAddressBook {
-        let isOnIOS9OrAbove = NSProcessInfo().isOperatingSystemAtLeastVersion(
-            NSOperatingSystemVersion(majorVersion: 9, minorVersion: 0, patchVersion: 0)
-        );
-        
-        if isOnIOS9OrAbove {
-            print("iOS >=  9.0.0")
-            return CNAddressBookImpl()
+    public func createInternalAddressBook() throws -> InternalAddressBook {
+
+        if #available(iOS 9.0, *) {
+        return CNAddressBookImpl()
         } else {
-            print("iOS < 9")
-            return ABAddressBookImpl()
+           return try ABAddressBookImpl()
         }
+        
     }
 }
 
 public class MyAddressBook: InternalAddressBook {
     private var internalAddressBook: InternalAddressBook!
     
-    public var personCount : Int {
-        get {
-            return internalAddressBook.personCount;
-        }
+    public convenience init() throws {
+        try self.init(factory: APIVersionAddressBookFactory())
     }
     
-    public convenience init() {
-        self.init(factory: APIVersionAddressBookFactory())
+    public init(factory: InternalAddressBookFactory) throws {
+        internalAddressBook = try factory.createInternalAddressBook()
     }
     
-    public init(factory: InternalAddressBookFactory) {
-        internalAddressBook = factory.createInternalAddressBook()
+    public func requestAccessToAddressBook(completion: (Bool, NSError?) -> Void) {
+        internalAddressBook.requestAccessToAddressBook(completion)
     }
     
-    public func requestAccess(completion: (Bool) -> Void) {
-        internalAddressBook.requestAccess(completion)
+    public func retrieveRecordsCount() throws -> Int {
+        return try internalAddressBook.retrieveRecordsCount()
     }
     
-    public func addContact(contact: ContactToInsert) -> AlreadySavedContact {
-        return internalAddressBook.addContact(contact)
+    public func addContact(contact: ContactValues) throws -> FetchedContactValues {
+        return try internalAddressBook.addContact(contact)
     }
     
-    public func updateContact(contact: AlreadySavedContact) {
+    public func updateContact(contact: FetchedContactValues) {
         internalAddressBook.updateContact(contact)
     }
     
-    public func deleteContactWithIdentifier(identifier: String?) {
-        internalAddressBook.deleteContactWithIdentifier(identifier)
+    public func deleteContactWithIdentifier(identifier: String?) throws {
+        try internalAddressBook.deleteContactWithIdentifier(identifier)
     }
     
-    public func deleteAllContacts() {
-        internalAddressBook.deleteAllContacts()
+    public func deleteAllContacts() throws {
+        try internalAddressBook.deleteAllContacts()
     }
     
     public func commitChanges() throws {
         try internalAddressBook.commitChanges()
     }
     
-    public func findContactWithIdentifier(identifier: String?) -> AlreadySavedContact? {
+    public func findContactWithIdentifier(identifier: String?) -> FetchedContactValues? {
         return internalAddressBook.findContactWithIdentifier(identifier)
     }
 }

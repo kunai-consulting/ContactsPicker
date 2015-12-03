@@ -18,7 +18,7 @@ public class ABAddressBookTest: ContactsPickerBaseTest {
 }
 
 internal class ABInternalAddressBookFactory: InternalAddressBookFactory {
-    func createInternalAddressBook() -> InternalAddressBook {
-        return ABAddressBookImpl()
+    func createInternalAddressBook() throws -> InternalAddressBook {
+        return try ABAddressBookImpl()
     }
 }

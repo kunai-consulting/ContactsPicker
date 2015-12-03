@@ -9,16 +9,18 @@
 import Foundation
 import Contacts
 
+@available(iOS 9.0, *)
 let cnMappings = [
-    KunaiLabeledValue.LabelMain : CNLabelPhoneNumberMain,
-    KunaiLabeledValue.LabelHome : CNLabelHome,
-    KunaiLabeledValue.LabelWork : CNLabelWork,
-    KunaiLabeledValue.LabelOther : CNLabelOther,
-    KunaiLabeledValue.LabelPhoneiPhone : CNLabelPhoneNumberiPhone,
-    KunaiLabeledValue.LabelPhoneMobile : CNLabelPhoneNumberMobile
+    LabeledValue.LabelMain : CNLabelPhoneNumberMain,
+    LabeledValue.LabelHome : CNLabelHome,
+    LabeledValue.LabelWork : CNLabelWork,
+    LabeledValue.LabelOther : CNLabelOther,
+    LabeledValue.LabelPhoneiPhone : CNLabelPhoneNumberiPhone,
+    LabeledValue.LabelPhoneMobile : CNLabelPhoneNumberMobile
 ]
 
-internal class CNContactRecord: AlreadySavedContact {
+@available(iOS 9.0, *)
+internal class CNContactRecord: FetchedContactValues {
     
     internal let wrappedContact: CNMutableContact
     
@@ -75,7 +77,7 @@ internal class CNContactRecord: AlreadySavedContact {
         }
     }
     
-    var phoneNumbers: [KunaiLabeledValue]? {
+    var phoneNumbers: [LabeledValue]? {
         get {
             return CNAdapter.convertCNLabeledValues(wrappedContact.phoneNumbers)
         }
@@ -84,7 +86,7 @@ internal class CNContactRecord: AlreadySavedContact {
         }
     }
     
-    var emailAddresses: [KunaiLabeledValue]? {
+    var emailAddresses: [LabeledValue]? {
         get {
             return CNAdapter.convertCNLabeledValues(wrappedContact.emailAddresses)
         }
@@ -94,9 +96,10 @@ internal class CNContactRecord: AlreadySavedContact {
     }
 }
 
+@available(iOS 9.0, *)
 internal class CNAdapter {
     
-    internal class func convertKunaiContact(kunaiContact: ContactToInsert) -> CNMutableContact {
+    internal class func convertKunaiContact(kunaiContact: ContactValues) -> CNMutableContact {
         let cnContact = CNMutableContact()
         if let firstName = kunaiContact.firstName {
              cnContact.givenName = firstName
@@ -116,18 +119,18 @@ internal class CNAdapter {
         return cnContact
     }
     
-    private class func convertPhoneNumbers(phoneNumbers: [KunaiLabeledValue]?) -> [CNLabeledValue] {
+    private class func convertPhoneNumbers(phoneNumbers: [LabeledValue]?) -> [CNLabeledValue] {
         
         guard let phoneNumbers = phoneNumbers else {
             return [CNLabeledValue]()
         }
         
         return phoneNumbers.map({
-            ( kunaiLabeledValue) -> CNLabeledValue in
+            ( LabeledValue) -> CNLabeledValue in
             
-            let label = ContactAdapter.convertLabel(cnMappings, label: kunaiLabeledValue.label)
+            let label = ContactAdapter.convertLabel(cnMappings, label: LabeledValue.label)
             var phoneNumber: CNPhoneNumber
-            if let phoneNumberAsString = kunaiLabeledValue.value as? String {
+            if let phoneNumberAsString = LabeledValue.value as? String {
                 phoneNumber = CNPhoneNumber(stringValue: phoneNumberAsString)
             } else {
                 phoneNumber = CNPhoneNumber()
@@ -137,30 +140,30 @@ internal class CNAdapter {
         })
     }
     
-    private class func convertEmailAddresses(emailAddresses: [KunaiLabeledValue]?) -> [CNLabeledValue] {
+    private class func convertEmailAddresses(emailAddresses: [LabeledValue]?) -> [CNLabeledValue] {
         
         guard let emailAddresses = emailAddresses else {
             return [CNLabeledValue]()
         }
         
         return emailAddresses.map({
-            ( kunaiLabeledValue) -> CNLabeledValue in
+            ( LabeledValue) -> CNLabeledValue in
             
-            let label = ContactAdapter.convertLabel(cnMappings, label: kunaiLabeledValue.label)
-            let value = kunaiLabeledValue.value
+            let label = ContactAdapter.convertLabel(cnMappings, label: LabeledValue.label)
+            let value = LabeledValue.value
             
             return CNLabeledValue(label: label, value: value)
         })
         
     }
     
-    private class func convertCNLabeledValues(cnLabeledValues: [CNLabeledValue]) -> [KunaiLabeledValue] {
-        var kunaiLabels = [KunaiLabeledValue]()
+    private class func convertCNLabeledValues(cnLabeledValues: [CNLabeledValue]) -> [LabeledValue] {
+        var kunaiLabels = [LabeledValue]()
         
-        let mappings = cnMappings.reversedDictionary
+        let mappings = DictionaryUtils.dictionaryWithSwappedKeysAndValues(cnMappings)
         for cnLabeledValue in cnLabeledValues {
             kunaiLabels.append(
-                KunaiLabeledValue(
+                LabeledValue(
                     label: ContactAdapter.convertLabel(mappings, label: cnLabeledValue.label),
                     value: cnLabeledValue.value))
         }

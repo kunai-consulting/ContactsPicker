@@ -9,44 +9,56 @@
 import Foundation
 import AddressBook
 
-
-
+@available(iOS 8.0, *)
 internal class ABAddressBookImpl: InternalAddressBook {
     
     private var addressBook: ABAddressBook!
     
-    internal init() {
+    internal init() throws {
         var err : Unmanaged<CFError>? = nil
         let ab = ABAddressBookCreateWithOptions(nil, &err)
         if err == nil {
             addressBook = ab.takeRetainedValue()
+        } else {
+            if let error = err?.takeRetainedValue() {
+                throw error
+            }
         }
     }
     
-    var personCount: Int {
-        get {
-            return ABAddressBookGetPersonCount(addressBook);
-        }
-    }
-    
-    func requestAccess(completion: (Bool) -> Void) {
+    func requestAccessToAddressBook(completion: (Bool, NSError?) -> Void) {
         ABAddressBookRequestAccessWithCompletion(addressBook) {
-            (let b : Bool, c : CFError!) -> Void in
-            completion(b)
+            (let access : Bool, error : CFError!) -> Void in
+            if access {
+                completion(access, nil)
+            } else {
+                completion(access, error as NSError)
+            }
         }
     }
     
-    func addContact(contact: ContactToInsert) -> AlreadySavedContact {
-        let record = ABRecordAdapter.toABRecordRef(contact)
-        ABAddressBookAddRecord(addressBook, record, nil)
-        return ABContactRecord(abRecord: record)
+    func retrieveRecordsCount() throws -> Int {
+        return ABAddressBookGetPersonCount(addressBook);
     }
     
-    func updateContact(contact: AlreadySavedContact) {
+    
+    func addContact(contact: ContactValues) throws -> FetchedContactValues {
+        let record = ABRecordAdapter.toABRecordRef(contact)
+        
+        if let error = (errorIfNoSuccess({
+            ABAddressBookAddRecord(self.addressBook, record, $0)
+        })) {
+            throw error
+        } else {
+            return ABContactRecord(abRecord: record)
+        }
+    }
+    
+    func updateContact(contact: FetchedContactValues) {
         
     }
     
-    func deleteContactWithIdentifier(identifier: String?) {
+    func deleteContactWithIdentifier(identifier: String?) throws {
         guard let id = identifier else {
             return
         }
@@ -57,22 +69,31 @@ internal class ABAddressBookImpl: InternalAddressBook {
         }
         
         let record = ABAddressBookGetPersonWithRecordID(addressBook, recordID).takeUnretainedValue()
-        ABAddressBookRemoveRecord(addressBook, record, nil)
+        if let error = (errorIfNoSuccess({
+            return ABAddressBookRemoveRecord(self.addressBook, record, $0)
+        })) {
+            throw error
+        }
+ 
     }
     
-    func deleteAllContacts() {
+    func deleteAllContacts() throws {
         let allPeople = ABAddressBookCopyArrayOfAllPeople(addressBook).takeRetainedValue()
         let allRecordsArray = allPeople as NSArray? as? [ABRecord]
         
         if let allRecords = allRecordsArray {
             for var person in allRecords {
-                ABAddressBookRemoveRecord(addressBook, person, nil)
+                if let error = (errorIfNoSuccess({
+                    return ABAddressBookRemoveRecord(self.addressBook, person, $0)
+                })) {
+                    throw error
+                }
             }
         }
 
     }
     
-    func findContactWithIdentifier(identifier: String?) -> AlreadySavedContact? {
+    func findContactWithIdentifier(identifier: String?) -> FetchedContactValues? {
         
         guard let id = identifier else {
             return nil

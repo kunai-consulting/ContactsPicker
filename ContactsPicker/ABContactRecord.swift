@@ -10,15 +10,15 @@ import Foundation
 import AddressBook
 
 let abMappings = [
-    KunaiLabeledValue.LabelMain : kABPersonPhoneMainLabel as String,
-    KunaiLabeledValue.LabelHome : kABPersonHomePageLabel as String,
-    KunaiLabeledValue.LabelWork : kABWorkLabel as String,
-    KunaiLabeledValue.LabelOther : kABOtherLabel as String,
-    KunaiLabeledValue.LabelPhoneiPhone : kABPersonPhoneIPhoneLabel as String,
-    KunaiLabeledValue.LabelPhoneMobile : kABPersonPhoneMobileLabel as String
+    LabeledValue.LabelMain : kABPersonPhoneMainLabel as String,
+    LabeledValue.LabelHome : kABPersonHomePageLabel as String,
+    LabeledValue.LabelWork : kABWorkLabel as String,
+    LabeledValue.LabelOther : kABOtherLabel as String,
+    LabeledValue.LabelPhoneiPhone : kABPersonPhoneIPhoneLabel as String,
+    LabeledValue.LabelPhoneMobile : kABPersonPhoneMobileLabel as String
 ]
 
-internal class ABContactRecord: AlreadySavedContact {
+internal class ABContactRecord: FetchedContactValues {
     
     internal let record: ABRecord
     
@@ -52,7 +52,7 @@ internal class ABContactRecord: AlreadySavedContact {
         }
     }
     
-    var phoneNumbers: [KunaiLabeledValue]? {
+    var phoneNumbers: [LabeledValue]? {
         get {
             return ABRecordAdapter.getMultiValues(record, propertyName:  kABPersonPhoneProperty)
         }
@@ -65,7 +65,7 @@ internal class ABContactRecord: AlreadySavedContact {
         }
     }
     
-    var emailAddresses: [KunaiLabeledValue]? {
+    var emailAddresses: [LabeledValue]? {
         get {
             return ABRecordAdapter.getMultiValues(record, propertyName:  kABPersonEmailProperty)
         }
@@ -91,7 +91,7 @@ internal class ABContactRecord: AlreadySavedContact {
 
 internal class ABRecordAdapter {
     
-    internal class func toABRecordRef(kunaiContact: ContactToInsert) -> ABRecord {
+    internal class func toABRecordRef(kunaiContact: ContactValues) -> ABRecord {
         let person = ABPersonCreate().takeRetainedValue()
         
         if let phoneNumbers = kunaiContact.phoneNumbers {
@@ -124,9 +124,9 @@ internal class ABRecordAdapter {
         return person
     }
     
-    private class func createMultiValuesFromLabels(record: ABRecord, type: ABPropertyID, labels:[KunaiLabeledValue]?) -> ABMutableMultiValue {
-        var multiValue = createMultiValue(type)
-        let labels = labels ?? [KunaiLabeledValue]()
+    private class func createMultiValuesFromLabels(record: ABRecord, type: ABPropertyID, labels:[LabeledValue]?) -> ABMutableMultiValue {
+        let multiValue = createMultiValue(type)
+        let labels = labels ?? [LabeledValue]()
         for var kunaiValue in labels {
             ABMultiValueAddValueAndLabel(multiValue, kunaiValue.value, ContactAdapter.convertLabel(abMappings, label: kunaiValue.label), nil)
         }
@@ -147,9 +147,9 @@ internal class ABRecordAdapter {
         return value as? T
     }
     
-    private class func getMultiValues(record: ABRecord, propertyName : ABPropertyID) -> [KunaiLabeledValue] {
-        var array = [KunaiLabeledValue]()
-        let mappings = abMappings.reversedDictionary
+    private class func getMultiValues(record: ABRecord, propertyName : ABPropertyID) -> [LabeledValue] {
+        var array = [LabeledValue]()
+        let mappings = DictionaryUtils.dictionaryWithSwappedKeysAndValues(abMappings)
         let multivalue : ABMultiValue? = getPropertyFromRecord(record, propertyName: propertyName)
         for i : Int in 0..<(ABMultiValueGetCount(multivalue)) {
             let value = ABMultiValueCopyValueAtIndex(multivalue, i).takeRetainedValue() as? String
@@ -157,7 +157,7 @@ internal class ABRecordAdapter {
                 let id : Int = Int(ABMultiValueGetIdentifierAtIndex(multivalue, i))
                 let optionalLabel = ABMultiValueCopyLabelAtIndex(multivalue, i)?.takeRetainedValue() as? String
                 array.append(
-                    KunaiLabeledValue(label: ContactAdapter.convertLabel(mappings, label: optionalLabel), value: v)
+                    LabeledValue(label: ContactAdapter.convertLabel(mappings, label: optionalLabel), value: v)
                 )
             }
         }

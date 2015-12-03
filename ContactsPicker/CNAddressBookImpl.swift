@@ -9,43 +9,35 @@
 import Foundation
 import Contacts
 
-
+@available(iOS 9.0, *)
 internal class CNAddressBookImpl: InternalAddressBook {
     
     private var contactStore: CNContactStore!
     private var saveRequest: CNSaveRequest = CNSaveRequest()
     
-    var personCount: Int {
-        get {
-            do {
-                let containerId = contactStore.defaultContainerIdentifier()
-                let predicate = CNContact.predicateForContactsInContainerWithIdentifier(containerId)
-                return try contactStore.unifiedContactsMatchingPredicate(predicate, keysToFetch: []).count
-            } catch let e {
-                print("\(e)")
-                return 0;
-            }
-            
-        }
-    }
-    
     internal init() {
         contactStore = CNContactStore()
     }
     
-    func requestAccess(completion: (Bool) -> Void) {
+    func requestAccessToAddressBook(completion: (Bool, NSError?) -> Void) {
         contactStore.requestAccessForEntityType(CNEntityType.Contacts) { (access, err) -> Void in
-            completion(access)
+            completion(access, err)
         }
     }
     
-    func addContact(contact: ContactToInsert) -> AlreadySavedContact {
+    func retrieveRecordsCount() throws -> Int {
+        let containerId = contactStore.defaultContainerIdentifier()
+        let predicate = CNContact.predicateForContactsInContainerWithIdentifier(containerId)
+        return try contactStore.unifiedContactsMatchingPredicate(predicate, keysToFetch: []).count
+    }
+    
+    func addContact(contact: ContactValues) throws -> FetchedContactValues {
         let cnContact = CNAdapter.convertKunaiContact(contact)
         saveRequest.addContact(cnContact, toContainerWithIdentifier: nil)
         return CNContactRecord(cnContact: cnContact)
     }
     
-    func updateContact(contact: AlreadySavedContact) {
+    func updateContact(contact: FetchedContactValues) {
         guard let record = contact as? CNContactRecord else {
             return
         }
@@ -53,7 +45,7 @@ internal class CNAddressBookImpl: InternalAddressBook {
         saveRequest.updateContact(record.wrappedContact)
     }
     
-    func findContactWithIdentifier(identifier: String?) -> AlreadySavedContact? {
+    func findContactWithIdentifier(identifier: String?) -> FetchedContactValues? {
         guard let id = identifier else {
             return nil
         }
@@ -74,7 +66,7 @@ internal class CNAddressBookImpl: InternalAddressBook {
 
     }
     
-    func deleteContactWithIdentifier(identifier: String?) {
+    func deleteContactWithIdentifier(identifier: String?) throws {
         guard let id = identifier else {
             return
         }
@@ -82,12 +74,12 @@ internal class CNAddressBookImpl: InternalAddressBook {
         do {
             let contact = try contactStore.unifiedContactWithIdentifier(id, keysToFetch: [CNContactIdentifierKey])
             saveRequest.deleteContact(contact.mutableCopy() as! CNMutableContact)
-        } catch {
-            // ??
+        } catch let e{
+            throw e
         }
     }
     
-    func deleteAllContacts() {
+    func deleteAllContacts() throws {
         let containerId = contactStore.defaultContainerIdentifier()
         let predicate = CNContact.predicateForContactsInContainerWithIdentifier(containerId)
         let keys = [CNContactIdentifierKey]
@@ -97,7 +89,7 @@ internal class CNAddressBookImpl: InternalAddressBook {
                 saveRequest.deleteContact(contact.mutableCopy() as! CNMutableContact)
             }
         } catch let e {
-            print(e)
+            throw e
         }
         
     }
