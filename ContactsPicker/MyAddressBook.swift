@@ -8,35 +8,35 @@
 
 import Foundation
 
-public protocol InternalAddressBook {
+public protocol AddressBookProtocol {
     
     func requestAccessToAddressBook( completion: (Bool, NSError?) -> Void )
+
+    func retrieveAddressBookRecordsCount() throws -> Int
+
+    func addContactToAddressBook(contact: ContactProtocol) throws -> ContactProtocol
     
-    func retrieveRecordsCount() throws -> Int
-    
-    func addContact(contact: ContactValues) throws -> FetchedContactValues
-    
-    func updateContact(contact: FetchedContactValues)
+    func updateContact(contact: ContactProtocol)
     
     func deleteAllContacts() throws
     
     func deleteContactWithIdentifier(identifier: String?) throws
     
-    func findContactWithIdentifier(identifier: String?) -> FetchedContactValues?
-    
-    func commitChanges() throws
+    func findContactWithIdentifier(identifier: String?) -> ContactProtocol?
+
+    func commitChangesToAddressBook() throws
 }
 
-public protocol InternalAddressBookFactory {
-    func createInternalAddressBook() throws -> InternalAddressBook
+public protocol AddressBookFactory {
+    func createAddressBook() throws -> AddressBookProtocol
 }
 
-public class APIVersionAddressBookFactory : InternalAddressBookFactory {
+public class APIVersionAddressBookFactory : AddressBookFactory {
     
-    public func createInternalAddressBook() throws -> InternalAddressBook {
+    public func createAddressBook() throws -> AddressBookProtocol {
 
         if #available(iOS 9.0, *) {
-        return CNAddressBookImpl()
+            return CNAddressBookImpl()
         } else {
            return try ABAddressBookImpl()
         }
@@ -44,30 +44,30 @@ public class APIVersionAddressBookFactory : InternalAddressBookFactory {
     }
 }
 
-public class MyAddressBook: InternalAddressBook {
-    private var internalAddressBook: InternalAddressBook!
+public class MyAddressBook: AddressBookProtocol {
+    private var internalAddressBook: AddressBookProtocol!
     
     public convenience init() throws {
         try self.init(factory: APIVersionAddressBookFactory())
     }
     
-    public init(factory: InternalAddressBookFactory) throws {
-        internalAddressBook = try factory.createInternalAddressBook()
+    public init(factory: AddressBookFactory) throws {
+        internalAddressBook = try factory.createAddressBook()
     }
     
     public func requestAccessToAddressBook(completion: (Bool, NSError?) -> Void) {
         internalAddressBook.requestAccessToAddressBook(completion)
     }
     
-    public func retrieveRecordsCount() throws -> Int {
-        return try internalAddressBook.retrieveRecordsCount()
+    public func retrieveAddressBookRecordsCount() throws -> Int {
+        return try internalAddressBook.retrieveAddressBookRecordsCount()
     }
     
-    public func addContact(contact: ContactValues) throws -> FetchedContactValues {
-        return try internalAddressBook.addContact(contact)
+    public func addContactToAddressBook(contact: ContactProtocol) throws -> ContactProtocol {
+        return try internalAddressBook.addContactToAddressBook(contact)
     }
     
-    public func updateContact(contact: FetchedContactValues) {
+    public func updateContact(contact: ContactProtocol) {
         internalAddressBook.updateContact(contact)
     }
     
@@ -79,11 +79,11 @@ public class MyAddressBook: InternalAddressBook {
         try internalAddressBook.deleteAllContacts()
     }
     
-    public func commitChanges() throws {
-        try internalAddressBook.commitChanges()
+    public func commitChangesToAddressBook() throws {
+        try internalAddressBook.commitChangesToAddressBook()
     }
     
-    public func findContactWithIdentifier(identifier: String?) -> FetchedContactValues? {
+    public func findContactWithIdentifier(identifier: String?) -> ContactProtocol? {
         return internalAddressBook.findContactWithIdentifier(identifier)
     }
 }

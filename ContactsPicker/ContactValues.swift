@@ -9,7 +9,11 @@ import Foundation
 import Contacts
 import AddressBook
 
-public protocol ContactValues {
+public protocol ContactProtocol {
+    
+    var identifier: String? {
+        get
+    }
     
     var firstName: String? {
         get set
@@ -19,11 +23,11 @@ public protocol ContactValues {
         get set
     }
     
-    var phoneNumbers: [LabeledValue]? {
+    var phoneNumbers: [AddressBookRecordLabel]? {
         get set
     }
     
-    var emailAddresses: [LabeledValue]? {
+    var emailAddresses: [AddressBookRecordLabel]? {
         get set
     }
     
@@ -32,21 +36,17 @@ public protocol ContactValues {
     }
 }
 
-public protocol FetchedContactValues : ContactValues {
-    var identifier: String? {
-        get
-    }
-}
+public class AddressBookRecordLabel {
 
-public class LabeledValue {
-    
-    public static let LabelMain = "LabelMain"
-    public static let LabelHome = "LabelHome"
-    public static let LabelWork = "LabelWork"
-    public static let LabelOther = "LabelOther"
-    public static let LabelPhoneiPhone = "LabelPhoneiPhone"
-    public static let LabelPhoneMobile = "LabelPhoneMobile"
-    
+    public enum LabelType: String {
+        case Main = "LabelMain"
+        case Home = "LabelHome"
+        case Work = "LabelWork"
+        case Other = "LabelOther"
+        case PhoneiPhone = "LabelPhoneiPhone"
+        case PhoneMobile = "LabelPhoneMobile"
+    }
+
     public var label: String?
     public var value: protocol<NSCopying, NSSecureCoding>
     
@@ -54,24 +54,27 @@ public class LabeledValue {
         self.label = label
         self.value = value
     }
-
-}
-
-public class NewContactValues: ContactValues {
     
-    public var firstName: String?
-    
-    public var lastName: String?
-    
-    public var phoneNumbers: [LabeledValue]?
-    
-    public var emailAddresses: [LabeledValue]?
-    
-    public var organizationName: String?
-    
-    public init() {
-        phoneNumbers = [LabeledValue]()
-        emailAddresses = [LabeledValue]()
+    public init(label: LabelType, value: protocol<NSCopying, NSSecureCoding>) {
+        self.label = label.rawValue
+        self.value = value
     }
     
+    internal class func convertLabel(mappings: [String:String], label: String?) -> String? {
+        guard let label = label else {
+            return nil
+        }
+        
+        guard !label.isEmpty else {
+            return nil
+        }
+        
+        if mappings.keys.contains(label) {
+            return mappings[label]
+        } else {
+            return label
+        }
+    }
+
 }
+

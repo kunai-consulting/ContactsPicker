@@ -10,15 +10,15 @@ import Foundation
 @testable import ContactsPicker
 
 public class ABAddressBookTest: ContactsPickerBaseTest {
-    override var factory: InternalAddressBookFactory {
+    override var factory: AddressBookFactory {
         get {
-            return ABInternalAddressBookFactory()
+            return ABAddressBookFactory()
         }
     }
 }
 
-internal class ABInternalAddressBookFactory: InternalAddressBookFactory {
-    func createInternalAddressBook() throws -> InternalAddressBook {
+internal class ABAddressBookFactory: AddressBookFactory {
+    func createAddressBook() throws -> AddressBookProtocol {
         return try ABAddressBookImpl()
     }
 }

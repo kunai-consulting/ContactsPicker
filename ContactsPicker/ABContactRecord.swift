@@ -10,15 +10,15 @@ import Foundation
 import AddressBook
 
 let abMappings = [
-    LabeledValue.LabelMain : kABPersonPhoneMainLabel as String,
-    LabeledValue.LabelHome : kABPersonHomePageLabel as String,
-    LabeledValue.LabelWork : kABWorkLabel as String,
-    LabeledValue.LabelOther : kABOtherLabel as String,
-    LabeledValue.LabelPhoneiPhone : kABPersonPhoneIPhoneLabel as String,
-    LabeledValue.LabelPhoneMobile : kABPersonPhoneMobileLabel as String
+    AddressBookRecordLabel.LabelType.Main.rawValue : kABPersonPhoneMainLabel as String,
+    AddressBookRecordLabel.LabelType.Home.rawValue : kABPersonHomePageLabel as String,
+    AddressBookRecordLabel.LabelType.Work.rawValue : kABWorkLabel as String,
+    AddressBookRecordLabel.LabelType.Other.rawValue : kABOtherLabel as String,
+    AddressBookRecordLabel.LabelType.PhoneiPhone.rawValue : kABPersonPhoneIPhoneLabel as String,
+    AddressBookRecordLabel.LabelType.PhoneMobile.rawValue : kABPersonPhoneMobileLabel as String
 ]
 
-internal class ABContactRecord: FetchedContactValues {
+internal class ABContactRecord: ContactProtocol {
     
     internal let record: ABRecord
     
@@ -52,7 +52,7 @@ internal class ABContactRecord: FetchedContactValues {
         }
     }
     
-    var phoneNumbers: [LabeledValue]? {
+    var phoneNumbers: [AddressBookRecordLabel]? {
         get {
             return ABRecordAdapter.getMultiValues(record, propertyName:  kABPersonPhoneProperty)
         }
@@ -65,7 +65,7 @@ internal class ABContactRecord: FetchedContactValues {
         }
     }
     
-    var emailAddresses: [LabeledValue]? {
+    var emailAddresses: [AddressBookRecordLabel]? {
         get {
             return ABRecordAdapter.getMultiValues(record, propertyName:  kABPersonEmailProperty)
         }
@@ -91,14 +91,14 @@ internal class ABContactRecord: FetchedContactValues {
 
 internal class ABRecordAdapter {
     
-    internal class func convertContactValuesToABRecord(contact: ContactValues) -> ABRecord {
+    internal class func convertContactToABRecord(contact: ContactProtocol) -> ABRecord {
         let person = ABPersonCreate().takeRetainedValue()
         
         if let phoneNumbers = contact.phoneNumbers {
             let phoneNumberMultiValue = createMultiValue(kABPersonPhoneProperty)
             
             for var phoneNumberLabeledValue in phoneNumbers {
-                ABMultiValueAddValueAndLabel(phoneNumberMultiValue, phoneNumberLabeledValue.value, ContactAdapter.convertLabel(abMappings, label: phoneNumberLabeledValue.label), nil)
+                ABMultiValueAddValueAndLabel(phoneNumberMultiValue, phoneNumberLabeledValue.value, AddressBookRecordLabel.convertLabel(abMappings, label: phoneNumberLabeledValue.label), nil)
             }
             setValueToRecord(person, key: kABPersonPhoneProperty, phoneNumberMultiValue)
         }
@@ -107,7 +107,7 @@ internal class ABRecordAdapter {
             let emailAddressesMultiValue = createMultiValue(kABPersonEmailProperty)
             
             for var emailLabeledValue in emailAddresses {
-                ABMultiValueAddValueAndLabel(emailAddressesMultiValue, emailLabeledValue.value, ContactAdapter.convertLabel(abMappings, label: emailLabeledValue.label), nil)
+                ABMultiValueAddValueAndLabel(emailAddressesMultiValue, emailLabeledValue.value, AddressBookRecordLabel.convertLabel(abMappings, label: emailLabeledValue.label), nil)
             }
             
             setValueToRecord(person, key: kABPersonEmailProperty, emailAddressesMultiValue)
@@ -123,44 +123,62 @@ internal class ABRecordAdapter {
         
         return person
     }
-    
-    private class func createMultiValuesFromLabels(record: ABRecord, type: ABPropertyID, labels:[LabeledValue]?) -> ABMutableMultiValue {
+    internal class func createMultiValuesFromLabels(record: ABRecord, type: ABPropertyID, labels:[AddressBookRecordLabel]?) -> ABMutableMultiValue {
         let multiValue = createMultiValue(type)
-        let labels = labels ?? [LabeledValue]()
-        for var kunaiValue in labels {
-            ABMultiValueAddValueAndLabel(multiValue, kunaiValue.value, ContactAdapter.convertLabel(abMappings, label: kunaiValue.label), nil)
+        let labels = labels ?? [AddressBookRecordLabel]()
+        for var adressBookLabel in labels {
+            addLabelToMultiValue(multiValue, label: adressBookLabel)
         }
         return multiValue
     }
     
-    private class func createMultiValue(type: ABPropertyID) -> ABMutableMultiValue {
+    internal class func addLabelToMultiValue(multivalue: ABMutableMultiValue, label: AddressBookRecordLabel) {
+        ABMultiValueAddValueAndLabel(multivalue, label.value, AddressBookRecordLabel.convertLabel(abMappings, label: label.label), nil)
+    }
+    
+    internal class func createMultiValue(type: ABPropertyID) -> ABMutableMultiValue {
         return ABMultiValueCreateMutable(ABPersonGetTypeOfProperty(type)).takeRetainedValue()
     }
     
-    private class func setValueToRecord<T : AnyObject>(record : ABRecord!, key : ABPropertyID, _ value : T?) {
+    internal class func setValueToRecord<T : AnyObject>(record : ABRecord!, key : ABPropertyID, _ value : T?) {
         ABRecordSetValue(record, key, value, nil)
     }
     
     
-    private class func getPropertyFromRecord<T>(record: ABRecord, propertyName : ABPropertyID) -> T? {
+    internal class func getPropertyFromRecord<T>(record: ABRecord, propertyName : ABPropertyID) -> T? {
         let value: AnyObject? = ABRecordCopyValue(record, propertyName)?.takeRetainedValue()
         return value as? T
     }
     
-    private class func getMultiValues(record: ABRecord, propertyName : ABPropertyID) -> [LabeledValue] {
-        var array = [LabeledValue]()
-        let mappings = DictionaryUtils.dictionaryWithSwappedKeysAndValues(abMappings)
-        let multivalue : ABMultiValue? = getPropertyFromRecord(record, propertyName: propertyName)
+    internal class func getMultiValues(record: ABRecord, propertyName : ABPropertyID) -> [AddressBookRecordLabel] {
+        var array = [AddressBookRecordLabel]()
+        let multivalue : ABMultiValue = getPropertyFromRecord(record, propertyName: propertyName) ?? createMultiValue(propertyName)
+        
         for i : Int in 0..<(ABMultiValueGetCount(multivalue)) {
-            let value = ABMultiValueCopyValueAtIndex(multivalue, i).takeRetainedValue() as? String
-            if let v = value {
-                let id : Int = Int(ABMultiValueGetIdentifierAtIndex(multivalue, i))
-                let optionalLabel = ABMultiValueCopyLabelAtIndex(multivalue, i)?.takeRetainedValue() as? String
-                array.append(
-                    LabeledValue(label: ContactAdapter.convertLabel(mappings, label: optionalLabel), value: v)
-                )
+            if let addressBookRecordLabel = getAddressBookRecordLabelFromMultiValue(multivalue, i: i) {
+                array.append(addressBookRecordLabel)
             }
         }
         return array
+    }
+    
+    internal class func getAddressBookRecordLabelFromMultiValue(multivalue: ABMultiValue, i: Int) -> AddressBookRecordLabel? {
+        let mappings = DictionaryUtils.dictionaryWithSwappedKeysAndValues(abMappings)
+        return getAddressBookRecordLabelFromMultiValue(multivalue, i: i, labelMappings: mappings)
+    }
+    
+    internal class func getAddressBookRecordLabelFromMultiValue(multivalue: ABMultiValue, i: Int, labelMappings: Dictionary<String, String>) -> AddressBookRecordLabel? {
+        let value = ABMultiValueCopyValueAtIndex(multivalue, i).takeRetainedValue() as? String
+        
+        if let v = value {
+            let optionalCFLabel = ABMultiValueCopyLabelAtIndex(multivalue, i)?.takeRetainedValue()
+            var optionalLabel: String?
+            if let cfLabel = optionalCFLabel {
+                optionalLabel = cfLabel as String?
+            }
+            return AddressBookRecordLabel(label: AddressBookRecordLabel.convertLabel(labelMappings, label: optionalLabel), value: v)
+        } else {
+            return nil
+        }
     }
 }

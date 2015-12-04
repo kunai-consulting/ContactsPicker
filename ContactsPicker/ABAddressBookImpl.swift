@@ -10,7 +10,7 @@ import Foundation
 import AddressBook
 
 @available(iOS 8.0, *)
-internal class ABAddressBookImpl: InternalAddressBook {
+internal class ABAddressBookImpl: AddressBookProtocol {
     
     private var addressBook: ABAddressBook!
     
@@ -37,13 +37,13 @@ internal class ABAddressBookImpl: InternalAddressBook {
         }
     }
     
-    func retrieveRecordsCount() throws -> Int {
+    func retrieveAddressBookRecordsCount() throws -> Int {
         return ABAddressBookGetPersonCount(addressBook);
     }
     
     
-    func addContact(contact: ContactValues) throws -> FetchedContactValues {
-        let record = ABRecordAdapter.convertContactValuesToABRecord(contact)
+    func addContactToAddressBook(contact: ContactProtocol) throws -> ContactProtocol {
+        let record = ABRecordAdapter.convertContactToABRecord(contact)
         
         if let error = (errorIfNoSuccess({
             ABAddressBookAddRecord(self.addressBook, record, $0)
@@ -54,7 +54,7 @@ internal class ABAddressBookImpl: InternalAddressBook {
         }
     }
     
-    func updateContact(contact: FetchedContactValues) {
+    func updateContact(contact: ContactProtocol) {
         
     }
     
@@ -93,7 +93,7 @@ internal class ABAddressBookImpl: InternalAddressBook {
 
     }
     
-    func findContactWithIdentifier(identifier: String?) -> FetchedContactValues? {
+    func findContactWithIdentifier(identifier: String?) -> ContactProtocol? {
         
         guard let id = identifier else {
             return nil
@@ -111,7 +111,7 @@ internal class ABAddressBookImpl: InternalAddressBook {
         }
     }
     
-    func commitChanges() throws {
+    func commitChangesToAddressBook() throws {
         if let err = save() {
             print("commit error: \(err.localizedDescription)")
             throw err

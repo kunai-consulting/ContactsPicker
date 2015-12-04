@@ -10,7 +10,7 @@ import Foundation
 import Contacts
 
 @available(iOS 9.0, *)
-internal class CNAddressBookImpl: InternalAddressBook {
+internal class CNAddressBookImpl: AddressBookProtocol {
     
     private var contactStore: CNContactStore!
     private var saveRequest: CNSaveRequest = CNSaveRequest()
@@ -25,19 +25,19 @@ internal class CNAddressBookImpl: InternalAddressBook {
         }
     }
     
-    func retrieveRecordsCount() throws -> Int {
+    func retrieveAddressBookRecordsCount() throws -> Int {
         let containerId = contactStore.defaultContainerIdentifier()
         let predicate = CNContact.predicateForContactsInContainerWithIdentifier(containerId)
         return try contactStore.unifiedContactsMatchingPredicate(predicate, keysToFetch: []).count
     }
     
-    func addContact(contact: ContactValues) throws -> FetchedContactValues {
+    func addContactToAddressBook(contact: ContactProtocol) throws -> ContactProtocol {
         let cnContact = CNAdapter.convertContactValuesToCNContact(contact)
         saveRequest.addContact(cnContact, toContainerWithIdentifier: nil)
         return CNContactRecord(cnContact: cnContact)
     }
     
-    func updateContact(contact: FetchedContactValues) {
+    func updateContact(contact: ContactProtocol) {
         guard let record = contact as? CNContactRecord else {
             return
         }
@@ -45,7 +45,7 @@ internal class CNAddressBookImpl: InternalAddressBook {
         saveRequest.updateContact(record.wrappedContact)
     }
     
-    func findContactWithIdentifier(identifier: String?) -> FetchedContactValues? {
+    func findContactWithIdentifier(identifier: String?) -> ContactProtocol? {
         guard let id = identifier else {
             return nil
         }
@@ -94,7 +94,7 @@ internal class CNAddressBookImpl: InternalAddressBook {
         
     }
     
-    func commitChanges() throws {
+    func commitChangesToAddressBook() throws {
         try contactStore.executeSaveRequest(saveRequest)
         saveRequest = CNSaveRequest()
     }

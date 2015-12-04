@@ -15,9 +15,19 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         do {
             let ab = try MyAddressBook()
-            ab.requestAccessToAddressBook{ (access, err) -> Void in
+            ab.requestAccessToAddressBook({ (access, error) -> Void in
                 print("accesss")
-            }
+                let contact = AddressBookRecord()
+                contact.firstName = "Me"
+                contact.lastName = "Is here"
+                contact.phoneNumbers = [AddressBookRecordLabel(label: nil, value: "111"), AddressBookRecordLabel(label: nil, value: "111")]
+                do {
+                    try ab.addContactToAddressBook(contact)
+                    try ab.commitChangesToAddressBook()
+                } catch {
+                    
+                }
+            })
         } catch {
             
         }

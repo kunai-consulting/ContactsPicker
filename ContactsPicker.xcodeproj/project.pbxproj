@@ -22,12 +22,14 @@
 		AE257F4D1C0DED5A0026B9B1 /* XCTAssertSwiftError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE257F4C1C0DED5A0026B9B1 /* XCTAssertSwiftError.swift */; };
 		AE257F511C0F2A3B0026B9B1 /* CNContactRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE257F501C0F2A3B0026B9B1 /* CNContactRecord.swift */; };
 		AE257F531C0F2A700026B9B1 /* ABContactRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE257F521C0F2A700026B9B1 /* ABContactRecord.swift */; };
-		AE257F561C0F2D5B0026B9B1 /* CommonUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE257F551C0F2D5B0026B9B1 /* CommonUtils.swift */; };
+		AE4D4A401C11BCF50006616A /* AddressBookRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE4D4A3F1C11BCF50006616A /* AddressBookRecord.swift */; };
 		AE8B643F1C033A6400A273F5 /* ContactsPicker.h in Headers */ = {isa = PBXBuildFile; fileRef = AE8B643E1C033A6400A273F5 /* ContactsPicker.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AE8B64461C033A6400A273F5 /* ContactsPicker.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AE8B643B1C033A6400A273F5 /* ContactsPicker.framework */; };
 		AE96419A1C04757B003B4A47 /* ABAddressBookImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE9641991C04757B003B4A47 /* ABAddressBookImpl.swift */; settings = {COMPILER_FLAGS = "-Wno-deprecated-declarations"; }; };
 		AE96419C1C04758B003B4A47 /* CNAddressBookImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE96419B1C04758B003B4A47 /* CNAddressBookImpl.swift */; };
 		AE96419E1C047AE9003B4A47 /* ContactValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE96419D1C047AE9003B4A47 /* ContactValues.swift */; };
+		AE99651A1C11CB0200DC147D /* CNConversionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE9965191C11CB0200DC147D /* CNConversionTests.swift */; };
+		AE99651C1C11CB0E00DC147D /* ABConversionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE99651B1C11CB0E00DC147D /* ABConversionTests.swift */; };
 		AE9EFD1F1C106DD8004E8490 /* DictionaryUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE9EFD1E1C106DD8004E8490 /* DictionaryUtils.swift */; };
 /* End PBXBuildFile section */
 
@@ -67,7 +69,7 @@
 		AE257F4C1C0DED5A0026B9B1 /* XCTAssertSwiftError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XCTAssertSwiftError.swift; sourceTree = "<group>"; };
 		AE257F501C0F2A3B0026B9B1 /* CNContactRecord.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CNContactRecord.swift; sourceTree = "<group>"; };
 		AE257F521C0F2A700026B9B1 /* ABContactRecord.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ABContactRecord.swift; sourceTree = "<group>"; };
-		AE257F551C0F2D5B0026B9B1 /* CommonUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommonUtils.swift; sourceTree = "<group>"; };
+		AE4D4A3F1C11BCF50006616A /* AddressBookRecord.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddressBookRecord.swift; sourceTree = "<group>"; };
 		AE8B643B1C033A6400A273F5 /* ContactsPicker.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ContactsPicker.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AE8B643E1C033A6400A273F5 /* ContactsPicker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ContactsPicker.h; sourceTree = "<group>"; };
 		AE8B64401C033A6400A273F5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -76,6 +78,8 @@
 		AE9641991C04757B003B4A47 /* ABAddressBookImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ABAddressBookImpl.swift; sourceTree = "<group>"; };
 		AE96419B1C04758B003B4A47 /* CNAddressBookImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CNAddressBookImpl.swift; sourceTree = "<group>"; };
 		AE96419D1C047AE9003B4A47 /* ContactValues.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactValues.swift; sourceTree = "<group>"; };
+		AE9965191C11CB0200DC147D /* CNConversionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CNConversionTests.swift; sourceTree = "<group>"; };
+		AE99651B1C11CB0E00DC147D /* ABConversionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ABConversionTests.swift; sourceTree = "<group>"; };
 		AE9EFD1E1C106DD8004E8490 /* DictionaryUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryUtils.swift; sourceTree = "<group>"; };
 		BA91285F3F29FE9B29ECA974 /* Pods_ContactsPickerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ContactsPickerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -160,7 +164,6 @@
 		AE257F541C0F2D1E0026B9B1 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				AE257F551C0F2D5B0026B9B1 /* CommonUtils.swift */,
 				AE9EFD1E1C106DD8004E8490 /* DictionaryUtils.swift */,
 			);
 			name = Utils;
@@ -200,6 +203,7 @@
 				AE8B64401C033A6400A273F5 /* Info.plist */,
 				AE13EF481C0347CA009E92E2 /* MyAddressBook.swift */,
 				AE96419D1C047AE9003B4A47 /* ContactValues.swift */,
+				AE4D4A3F1C11BCF50006616A /* AddressBookRecord.swift */,
 			);
 			path = ContactsPicker;
 			sourceTree = "<group>";
@@ -207,6 +211,7 @@
 		AE8B64491C033A6400A273F5 /* ContactsPickerTests */ = {
 			isa = PBXGroup;
 			children = (
+				AE9965181C11CAF500DC147D /* ConversionTests */,
 				AE8B644C1C033A6400A273F5 /* Info.plist */,
 				AE257F461C0DEA960026B9B1 /* ContactsPickerBaseTest.swift */,
 				AE257F481C0DEB920026B9B1 /* CNAddressBookTest.swift */,
@@ -214,6 +219,15 @@
 				AE257F4C1C0DED5A0026B9B1 /* XCTAssertSwiftError.swift */,
 			);
 			path = ContactsPickerTests;
+			sourceTree = "<group>";
+		};
+		AE9965181C11CAF500DC147D /* ConversionTests */ = {
+			isa = PBXGroup;
+			children = (
+				AE9965191C11CB0200DC147D /* CNConversionTests.swift */,
+				AE99651B1C11CB0E00DC147D /* ABConversionTests.swift */,
+			);
+			name = ConversionTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -420,10 +434,10 @@
 			files = (
 				AE96419A1C04757B003B4A47 /* ABAddressBookImpl.swift in Sources */,
 				AE96419E1C047AE9003B4A47 /* ContactValues.swift in Sources */,
+				AE4D4A401C11BCF50006616A /* AddressBookRecord.swift in Sources */,
 				AE13EF491C0347CA009E92E2 /* MyAddressBook.swift in Sources */,
 				AE257F511C0F2A3B0026B9B1 /* CNContactRecord.swift in Sources */,
 				AE257F531C0F2A700026B9B1 /* ABContactRecord.swift in Sources */,
-				AE257F561C0F2D5B0026B9B1 /* CommonUtils.swift in Sources */,
 				AE96419C1C04758B003B4A47 /* CNAddressBookImpl.swift in Sources */,
 				AE9EFD1F1C106DD8004E8490 /* DictionaryUtils.swift in Sources */,
 			);
@@ -433,6 +447,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AE99651C1C11CB0E00DC147D /* ABConversionTests.swift in Sources */,
+				AE99651A1C11CB0200DC147D /* CNConversionTests.swift in Sources */,
 				AE257F491C0DEB920026B9B1 /* CNAddressBookTest.swift in Sources */,
 				AE257F4B1C0DEC310026B9B1 /* ABAddressBookTest.swift in Sources */,
 				AE257F471C0DEA960026B9B1 /* ContactsPickerBaseTest.swift in Sources */,
