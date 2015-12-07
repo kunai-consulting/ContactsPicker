@@ -7,98 +7,83 @@
 //
 
 import Foundation
-import AddressBook
-import Contacts
 
-protocol InternalAddressBook {
-    var personCount: Int {
-        get
-    }
+public protocol AddressBookProtocol {
     
-    func requestAccess( completion: (Bool) -> Void );
+    func requestAccessToAddressBook( completion: (Bool, NSError?) -> Void )
+
+    func retrieveAddressBookRecordsCount() throws -> Int
+
+    func addContactToAddressBook(contact: ContactProtocol) throws -> ContactProtocol
+    
+    func updateContact(contact: ContactProtocol)
+    
+    func deleteAllContacts() throws
+    
+    func deleteContactWithIdentifier(identifier: String?) throws
+    
+    func findContactWithIdentifier(identifier: String?) -> ContactProtocol?
+
+    func commitChangesToAddressBook() throws
 }
 
-private class ABAddressBookImpl: InternalAddressBook {
-    
-    private var addressBook: ABAddressBook!
-    
-    private init() {
-        var err : Unmanaged<CFError>? = nil
-        let ab = ABAddressBookCreateWithOptions(nil, &err)
-        if err == nil {
-            addressBook = ab.takeRetainedValue()
-        }
-    }
-    
-    var personCount: Int {
-        get {
-            return ABAddressBookGetPersonCount(addressBook);
-        }
-    }
-    
-    private func requestAccess(completion: (Bool) -> Void) {
-        ABAddressBookRequestAccessWithCompletion(addressBook) {
-            (let b : Bool, c : CFError!) -> Void in
-            completion(b)
-        }
-    }
+public protocol AddressBookFactory {
+    func createAddressBook() throws -> AddressBookProtocol
 }
 
-private class CNAddressBookImpl: InternalAddressBook {
+public class APIVersionAddressBookFactory : AddressBookFactory {
     
-    private var contactStore: CNContactStore!
-    
-    var personCount: Int {
-        get {
-            do {
-                let containerId = contactStore.defaultContainerIdentifier()
-                let predicate = CNContact.predicateForContactsInContainerWithIdentifier(containerId)
-                return try contactStore.unifiedContactsMatchingPredicate(predicate, keysToFetch: []).count
-            } catch let e {
-                print("\(e)")
-                return 0;
-            }
+    public func createAddressBook() throws -> AddressBookProtocol {
 
-        }
-    }
-    
-    private init() {
-        contactStore = CNContactStore()
-    }
-    
-    private func requestAccess(completion: (Bool) -> Void) {
-        contactStore.requestAccessForEntityType(CNEntityType.Contacts) { (access, err) -> Void in
-            completion(access)
-        }
-    }
-    
-}
-
-public class MyAddressBook {
-    private var internalAddressBook: InternalAddressBook!
-    
-    public var personCount : Int {
-        get {
-            return internalAddressBook.personCount;
-        }
-    }
-    
-    public init() {
-        
-        let isOnIOS9OrAbove = NSProcessInfo().isOperatingSystemAtLeastVersion(
-            NSOperatingSystemVersion(majorVersion: 9, minorVersion: 0, patchVersion: 0)
-        );
-            
-        if isOnIOS9OrAbove {
-            print("iOS >=  9.0.0")
-            internalAddressBook = CNAddressBookImpl()
+        if #available(iOS 9.0, *) {
+            return CNAddressBookImpl()
         } else {
-            print("iOS < 9")
-            internalAddressBook = ABAddressBookImpl()
+           return try ABAddressBookImpl()
         }
+        
+    }
+}
+
+public class MyAddressBook: AddressBookProtocol {
+    private var internalAddressBook: AddressBookProtocol!
+    
+    public convenience init() throws {
+        try self.init(factory: APIVersionAddressBookFactory())
     }
     
-    public func requestAccessWithCompletion( completion : (Bool) -> Void ) {
-        internalAddressBook.requestAccess(completion);
+    public init(factory: AddressBookFactory) throws {
+        internalAddressBook = try factory.createAddressBook()
+    }
+    
+    public func requestAccessToAddressBook(completion: (Bool, NSError?) -> Void) {
+        internalAddressBook.requestAccessToAddressBook(completion)
+    }
+    
+    public func retrieveAddressBookRecordsCount() throws -> Int {
+        return try internalAddressBook.retrieveAddressBookRecordsCount()
+    }
+    
+    public func addContactToAddressBook(contact: ContactProtocol) throws -> ContactProtocol {
+        return try internalAddressBook.addContactToAddressBook(contact)
+    }
+    
+    public func updateContact(contact: ContactProtocol) {
+        internalAddressBook.updateContact(contact)
+    }
+    
+    public func deleteContactWithIdentifier(identifier: String?) throws {
+        try internalAddressBook.deleteContactWithIdentifier(identifier)
+    }
+    
+    public func deleteAllContacts() throws {
+        try internalAddressBook.deleteAllContacts()
+    }
+    
+    public func commitChangesToAddressBook() throws {
+        try internalAddressBook.commitChangesToAddressBook()
+    }
+    
+    public func findContactWithIdentifier(identifier: String?) -> ContactProtocol? {
+        return internalAddressBook.findContactWithIdentifier(identifier)
     }
 }
