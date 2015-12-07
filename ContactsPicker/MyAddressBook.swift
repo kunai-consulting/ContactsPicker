@@ -8,6 +8,9 @@
 
 import Foundation
 
+public typealias ContactPredicate = (contat: ContactProtocol) -> (Bool)
+public typealias ContactResults = (results: [ContactProtocol]) -> ()
+
 public protocol AddressBookProtocol {
     
     func requestAccessToAddressBook( completion: (Bool, NSError?) -> Void )
@@ -22,7 +25,13 @@ public protocol AddressBookProtocol {
     
     func deleteContactWithIdentifier(identifier: String?) throws
     
+    func queryBuilder() -> AddressBookQueryBuilder
+    
     func findContactWithIdentifier(identifier: String?) -> ContactProtocol?
+    
+    func findContactsMatchingName(name: String) throws -> [ContactProtocol]
+    
+    func findAllContacts() throws -> [ContactProtocol]
 
     func commitChangesToAddressBook() throws
 }
@@ -83,7 +92,19 @@ public class MyAddressBook: AddressBookProtocol {
         try internalAddressBook.commitChangesToAddressBook()
     }
     
+    public func queryBuilder() -> AddressBookQueryBuilder {
+        return internalAddressBook.queryBuilder()
+    }
+    
     public func findContactWithIdentifier(identifier: String?) -> ContactProtocol? {
         return internalAddressBook.findContactWithIdentifier(identifier)
+    }
+    
+    public func findAllContacts() throws -> [ContactProtocol] {
+        return try internalAddressBook.findAllContacts()
+    }
+    
+    public func findContactsMatchingName(name: String) throws -> [ContactProtocol] {
+        return try internalAddressBook.findContactsMatchingName(name)
     }
 }

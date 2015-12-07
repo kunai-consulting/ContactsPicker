@@ -14,6 +14,21 @@ internal class CNAddressBookImpl: AddressBookProtocol {
     
     private var contactStore: CNContactStore!
     private var saveRequest: CNSaveRequest = CNSaveRequest()
+    private let defaultKeysToFetch = [
+        CNContactGivenNameKey,
+        CNContactFamilyNameKey,
+        CNContactEmailAddressesKey,
+        CNContactPhoneNumbersKey,
+        CNContactIdentifierKey
+    ]
+    
+    internal var allContactsPredicate: NSPredicate {
+        get {
+            let containerId = contactStore.defaultContainerIdentifier()
+            let predicate = CNContact.predicateForContactsInContainerWithIdentifier(containerId)
+            return predicate
+        }
+    }
     
     internal init() {
         contactStore = CNContactStore()
@@ -51,26 +66,40 @@ internal class CNAddressBookImpl: AddressBookProtocol {
         }
 
         do {
-            let contact = try contactStore.unifiedContactWithIdentifier(id, keysToFetch: [
-                    CNContactGivenNameKey,
-                    CNContactFamilyNameKey,
-                    CNContactEmailAddressesKey,
-                    CNContactPhoneNumbersKey,
-                    CNContactIdentifierKey
-                ])
-            
+            let contact = try contactStore.unifiedContactWithIdentifier(id, keysToFetch: defaultKeysToFetch)
             return CNContactRecord(cnContact: contact.mutableCopy() as! CNMutableContact)
         } catch {
             return nil
         }
-
+    }
+    
+    func queryBuilder() -> AddressBookQueryBuilder {
+        return CNAddressBookQueryBuilder(addressBook: self)
+    }
+    
+    func findAllContacts() throws -> [ContactProtocol] {
+        return try fetchContactsUsingPredicate(allContactsPredicate)
+    }
+    
+    func findContactsMatchingName(name: String) throws -> [ContactProtocol] {
+        let predicate = CNContact.predicateForContactsMatchingName(name)
+        return try fetchContactsUsingPredicate(predicate)
+    }
+    
+    func fetchContactsUsingPredicate(predicate: NSPredicate) throws -> [ContactProtocol] {
+        return try fetchContactsUsingPredicate(predicate, keys: defaultKeysToFetch)
+    }
+    
+    func fetchContactsUsingPredicate(predicate: NSPredicate, keys: [String]) throws -> [ContactProtocol] {
+        let cnContacts = try contactStore.unifiedContactsMatchingPredicate(predicate, keysToFetch: keys)
+        return CNAdapter.convertCNContactsToContactRecords(cnContacts)
     }
     
     func deleteContactWithIdentifier(identifier: String?) throws {
         guard let id = identifier else {
             return
         }
-        
+
         do {
             let contact = try contactStore.unifiedContactWithIdentifier(id, keysToFetch: [CNContactIdentifierKey])
             saveRequest.deleteContact(contact.mutableCopy() as! CNMutableContact)

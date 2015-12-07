@@ -93,6 +93,10 @@ internal class ABAddressBookImpl: AddressBookProtocol {
 
     }
     
+    func queryBuilder() -> AddressBookQueryBuilder {
+        return ABAddressBookQueryBuilder(addressBook: self)
+    }
+    
     func findContactWithIdentifier(identifier: String?) -> ContactProtocol? {
         
         guard let id = identifier else {
@@ -109,6 +113,27 @@ internal class ABAddressBookImpl: AddressBookProtocol {
         } else {
             return nil
         }
+    }
+    
+    func findAllABRecords() -> Array<ABRecord> {
+        let allRecords = ABAddressBookCopyArrayOfAllPeople(addressBook).takeRetainedValue() as Array<ABRecord>
+        return allRecords
+    }
+    
+    func findAllContacts() -> [ContactProtocol] {
+        var allContacts = [ContactProtocol]()
+        let allRecords = ABAddressBookCopyArrayOfAllPeople(addressBook).takeRetainedValue() as Array<ABRecord>
+        
+        for var record in allRecords {
+            allContacts.append(ABContactRecord(abRecord: record))
+        }
+        
+        return allContacts
+    }
+    
+    func findContactsMatchingName(name: String) -> [ContactProtocol] {
+        let matchingNameRecords = ABAddressBookCopyPeopleWithName(addressBook, name as CFString).takeRetainedValue() as Array<ABRecord>
+        return ABRecordAdapter.convertABRecordsToContactValues(matchingNameRecords)
     }
     
     func commitChangesToAddressBook() throws {

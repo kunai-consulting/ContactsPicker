@@ -36,6 +36,26 @@ public protocol ContactProtocol {
     }
 }
 
+public extension ContactProtocol {
+    var fullName: String? {
+        get {
+            if firstName == nil && lastName == nil {
+                return nil
+            }
+            
+            if firstName != nil && lastName == nil {
+                return firstName
+            }
+            
+            if firstName == nil && lastName != nil {
+                return lastName
+            }
+            
+            return "\(firstName!) \(lastName!)"
+        }
+    }
+}
+
 public class AddressBookRecordLabel {
 
     public enum LabelType: String {

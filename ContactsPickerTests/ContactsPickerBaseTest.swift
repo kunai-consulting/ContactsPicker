@@ -49,6 +49,10 @@ public class ContactsPickerBaseTest : XCTestCase {
     func requestAccess() {
         let expectation = self.expectationWithDescription("request access")
 
+        if addressBook == nil {
+            XCTFail("addressBook is nil!")
+            return
+        }
         addressBook.requestAccessToAddressBook({ (access, error) -> Void in
             XCTAssertTrue(access)
             expectation.fulfill()
@@ -120,8 +124,7 @@ public class ContactsPickerBaseTest : XCTestCase {
             try self.addressBook.commitChangesToAddressBook()
             let fetchedContact = self.addressBook.findContactWithIdentifier(savedContact.identifier)
             let fetchedNumbers = fetchedContact?.phoneNumbers
-            // What is correct behaviour?
-            // XCTAssertEqual(1, fetchedContact?.phoneNumbers?.count) 
+            XCTAssertEqual(2, fetchedContact?.phoneNumbers?.count)
         }
         
         
@@ -147,6 +150,51 @@ internal extension ContactsPickerBaseTest {
         return try! self.addressBook.addContactToAddressBook(contact)
     }
     
+    func addContactsAndCommit(names:[String]) {
+        
+        for name in names {
+            let components = name.componentsSeparatedByString(" ")
+            let firstName = components[0]
+            let lastName = components[1]
+            XCTempAssertNoThrowError { () -> () in
+                try self.addressBook.addContactToAddressBook(AddressBookRecord(firstName: firstName, lastName: lastName))
+            }
+        }
+        commitChanges()
+    }
+    
+    func addNumberOfContactsAndCommit(numberOfContacts: Int) {
+        for i in 0..<numberOfContacts {
+            XCTempAssertNoThrowError { () -> () in
+                let record = AddressBookRecord(firstName: "\(i)", lastName: "\(-i)")
+                record.phoneNumbers = [AddressBookRecordLabel(label: .Home, value: "111")]
+                record.emailAddresses = [AddressBookRecordLabel(label: .Work, value: "test@mail.com")]
+                record.organizationName = "Organization"
+                try self.addressBook.addContactToAddressBook(record)
+            }
+        }
+        
+        commitChanges()
+    }
+    
+    func fetchProperties(properties: [AddressBookRecordProperty]) -> [ContactProtocol] {
+        let queryBuilder = self.addressBook.queryBuilder().keysToFetch(properties)
+        do {
+            let results = try queryBuilder.query()
+            return results
+        } catch let e {
+            XCTFail()
+            return [ContactProtocol]()
+        }
+    }
+    
+    func deleteContactAndCommit(identifier: String) {
+        XCTempAssertNoThrowError{
+            try self.addressBook.deleteContactWithIdentifier(identifier)
+        }
+        commitChanges()
+    }
+    
     func addTestContactAndCommitChange() -> ContactProtocol {
         let savedContact = addTestContact()
         XCTempAssertNoThrowError{
@@ -159,5 +207,146 @@ internal extension ContactsPickerBaseTest {
         XCTempAssertNoThrowError{
             try self.addressBook.commitChangesToAddressBook()
         }
+    }
+}
+
+// getting all contacts or by name
+internal extension ContactsPickerBaseTest {
+    func testGettingAllContacts() {
+        addTestContactAndCommitChange()
+        let contacts = try! addressBook.findAllContacts()
+        XCTAssertEqual(contacts.count, 1)
+        if contacts.indices ~= 0 {
+            deleteContactAndCommit(contacts[0].identifier!)
+            XCTAssertEqual(0, try! addressBook.retrieveAddressBookRecordsCount())
+        }
+
+    }
+    
+    func testGettingContactsMatchingName() {
+        addContactsAndCommit(["A B", "X Y"])
+        
+        let contactsMatchingB = try! addressBook.findContactsMatchingName("B")
+        XCTAssertEqual(1, contactsMatchingB.count)
+        if contactsMatchingB.indices ~= 0 {
+            let matchingContact = contactsMatchingB[0]
+            XCTAssertEqual("A", matchingContact.firstName)
+            XCTAssertEqual("B", matchingContact.lastName)
+        }
+    }
+    
+}
+
+// querying
+internal extension ContactsPickerBaseTest {
+    
+    func testGettingContactsUsingPredicate() {
+        addContactsAndCommit(["VeryVeryVeryLong Name", "Short 1", "Short 2"])
+        let predicateForLongName: ContactPredicate = { contact in
+            return contact.fullName?.characters.count > 10
+        }
+        
+        XCTempAssertNoThrowError { () -> () in
+            let queryBuilder = self.addressBook.queryBuilder().matchingPredicate(predicateForLongName)
+            let contactsWithLongName = try queryBuilder.query()
+            XCTAssertEqual(contactsWithLongName.count, 1)
+            
+            if contactsWithLongName.indices ~= 0 {
+                XCTAssertEqual("VeryVeryVeryLong Name", contactsWithLongName[0].fullName)
+            }
+            
+        }
+
+    }
+    
+    func testGettingContactsUsingPredicateWhichAlwaysReturnsFalse() {
+        addContactsAndCommit(["name 1", "name 2", "name 3", "name 4"])
+        let brutalPredicate: ContactPredicate = { contact in
+            return false
+        }
+
+        XCTempAssertNoThrowError { () -> () in
+            let queryBuilder = self.addressBook.queryBuilder().matchingPredicate(brutalPredicate)
+            let resultCount = try queryBuilder.query().count
+            XCTAssertEqual(0, resultCount)
+        }
+        
+    }
+    
+    func testGettingAllKeys() {
+        addNumberOfContactsAndCommit(3)
+        for contact in fetchProperties(AddressBookRecordProperty.allValues) {
+            XCTAssertTrue(contact.hasAllProperties())
+        }
+    }
+    
+    func testGettingFewKeys() {
+        addNumberOfContactsAndCommit(3)
+        let keysToFetch: [AddressBookRecordProperty] = [.Identifier, .PhoneNumbers, .OrganizationName]
+        let unincludedKeys = Set(AddressBookRecordProperty.allValues).subtract(keysToFetch)
+        for contact in fetchProperties(keysToFetch) {
+            XCTAssertTrue(contact.hasProperties(keysToFetch))
+            XCTAssertFalse(contact.hasProperties(Array(unincludedKeys)))
+        }
+        
+    }
+    
+    func testGettingOIdentifierOnly() {
+        addNumberOfContactsAndCommit(3)
+        for contact in fetchProperties([.Identifier]) {
+            XCTAssertTrue(contact.hasProperty(.Identifier))
+            XCTAssertFalse(contact.hasProperty(.FirstName))
+        }
+    }
+}
+
+typealias PropertyMapper = (contact: ContactProtocol) -> AnyObject?
+let mappings: [AddressBookRecordProperty: PropertyMapper] = [
+    AddressBookRecordProperty.Identifier : { contact in
+        return contact.identifier
+    },
+    AddressBookRecordProperty.FirstName : { contact in
+        return contact.firstName
+    },
+    AddressBookRecordProperty.LastName : { contact in
+        return contact.lastName
+    },
+    AddressBookRecordProperty.EmailAddresses : { contact in
+        return contact.emailAddresses
+    },
+    AddressBookRecordProperty.PhoneNumbers : { contact in
+        return contact.phoneNumbers
+    },
+    AddressBookRecordProperty.OrganizationName : { contact in
+        return contact.organizationName
+    }
+]
+
+internal extension ContactProtocol {
+    
+    internal func mapProperty(property: AddressBookRecordProperty) -> AnyObject? {
+        return mappings[property]?(contact:self)
+    }
+    
+    internal func hasProperty(property: AddressBookRecordProperty) -> Bool {
+        return mapProperty(property) != nil
+    }
+    
+    internal func hasAllProperties() -> Bool {
+        return hasProperties(AddressBookRecordProperty.allValues)
+    }
+    
+    internal func hasAllEmptyProperties() -> Bool {
+        return !hasAllProperties()
+    }
+    
+    internal func hasProperties(properties: [AddressBookRecordProperty]) -> Bool {
+        for property in properties {
+            if !hasProperty(property) {
+                print("missing property \(property)")
+                return false
+            }
+        }
+        return true;
     }
 }

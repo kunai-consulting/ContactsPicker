@@ -31,4 +31,10 @@ public class AddressBookRecord: ContactProtocol {
         emailAddresses = [AddressBookRecordLabel]()
     }
     
+    public convenience init(firstName: String, lastName: String) {
+        self.init()
+        self.firstName = firstName
+        self.lastName = lastName
+    }
+    
 }
