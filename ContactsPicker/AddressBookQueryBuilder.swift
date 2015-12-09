@@ -8,6 +8,9 @@
 
 import Foundation
 
+public typealias ContactPredicate = (contat: ContactProtocol) -> (Bool)
+public typealias ContactResults = (results: [ContactProtocol]?, error: ErrorType?) -> ()
+
 public enum AddressBookRecordProperty {
     case Identifier
     case FirstName
@@ -31,7 +34,7 @@ public protocol AddressBookQueryBuilder {
     func keysToFetch(keys: [AddressBookRecordProperty]) -> AddressBookQueryBuilder
     func matchingPredicate(predicate: ContactPredicate) -> AddressBookQueryBuilder
     func query() throws -> [ContactProtocol]
-    func queryAsync(completion: ContactResults) throws
+    func queryAsync(completion: ContactResults)
 }
 
 internal class InternalAddressBookQueryBuilder<T: AddressBookProtocol>: AddressBookQueryBuilder {
@@ -71,7 +74,22 @@ internal class InternalAddressBookQueryBuilder<T: AddressBookProtocol>: AddressB
         return [ContactProtocol]()
     }
     
-    func queryAsync(completion: ContactResults) throws {
-        completion(results: [])
+    func queryAsync(completion: ContactResults) {
+        let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
+        dispatch_async(dispatch_get_global_queue(priority, 0)) {
+            do {
+                let results = try self.query()
+                dispatch_async(dispatch_get_main_queue()) {
+                    completion(results: results, error: nil)
+                }
+            }
+            catch let e {
+                dispatch_async(dispatch_get_main_queue()) {
+                    completion(results: nil, error: e)
+                }
+            }
+            
+
+        }
     }
 }

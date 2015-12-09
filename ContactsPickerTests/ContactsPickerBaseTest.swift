@@ -123,7 +123,6 @@ public class ContactsPickerBaseTest : XCTestCase {
             let savedContact = try self.addressBook.addContactToAddressBook(contact)
             try self.addressBook.commitChangesToAddressBook()
             let fetchedContact = self.addressBook.findContactWithIdentifier(savedContact.identifier)
-            let fetchedNumbers = fetchedContact?.phoneNumbers
             XCTAssertEqual(2, fetchedContact?.phoneNumbers?.count)
         }
         
@@ -271,6 +270,21 @@ internal extension ContactsPickerBaseTest {
             XCTAssertEqual(0, resultCount)
         }
         
+    }
+    
+    func testGettingContactsAsync() {
+        addContactsAndCommit(["name 1", "name 2"])
+        let queryBuilder = addressBook.queryBuilder().keysToFetch([.Identifier])
+        let expectation = self.expectationWithDescription("async query")
+        
+        queryBuilder.queryAsync { (results, error) -> () in
+            XCTAssertNotNil(results)
+            XCTAssertEqual(2, results!.count)
+            XCTAssertNil(error)
+            expectation.fulfill()
+        }
+        
+        self.waitForExpectationsWithTimeout(5, handler: nil)
     }
     
     func testGettingAllKeys() {

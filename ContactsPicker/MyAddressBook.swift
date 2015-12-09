@@ -8,9 +8,6 @@
 
 import Foundation
 
-public typealias ContactPredicate = (contat: ContactProtocol) -> (Bool)
-public typealias ContactResults = (results: [ContactProtocol]) -> ()
-
 public protocol AddressBookProtocol {
     
     func requestAccessToAddressBook( completion: (Bool, NSError?) -> Void )
