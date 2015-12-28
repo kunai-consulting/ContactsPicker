@@ -26,9 +26,17 @@ public class AddressBookRecord: ContactProtocol {
     
     public var organizationName: String?
     
+    public var middleName: String?
+    
     public init() {
         phoneNumbers = [AddressBookRecordLabel]()
         emailAddresses = [AddressBookRecordLabel]()
+    }
+    
+    public convenience init(firstName: String, lastName: String) {
+        self.init()
+        self.firstName = firstName
+        self.lastName = lastName
     }
     
 }

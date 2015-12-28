@@ -34,52 +34,83 @@ internal class CNContactRecord: ContactProtocol {
     
     var identifier: String? {
         get {
-            return wrappedContact.identifier
+            if wrappedContact.isKeyAvailable(CNContactIdentifierKey) {
+                return wrappedContact.identifier
+            } else {
+                return nil
+            }
         }
     }
     
     var firstName: String? {
         get {
-            return wrappedContact.givenName
+            if wrappedContact.isKeyAvailable(CNContactGivenNameKey) {
+                return wrappedContact.givenName
+            } else {
+                return nil
+            }
         }
         set {
             if let value = newValue {
                 wrappedContact.givenName = value
+            }
+        }
+    }
+    
+    var middleName: String? {
+        get {
+            if wrappedContact.isKeyAvailable(CNContactMiddleNameKey) {
+                return wrappedContact.middleName
             } else {
-                wrappedContact.givenName = ""
+                return nil
+            }
+        }
+        set {
+            if let value = newValue {
+                wrappedContact.middleName = value
             }
         }
     }
     
     var lastName: String? {
         get {
-            return wrappedContact.familyName
+            if wrappedContact.isKeyAvailable(CNContactFamilyNameKey) {
+                return wrappedContact.familyName
+            } else {
+                return nil
+            }
+
         }
         set {
             if let value = newValue {
                 wrappedContact.familyName = value
-            } else {
-                wrappedContact.familyName = ""
             }
         }
     }
     
     var organizationName: String? {
         get {
-            return wrappedContact.organizationName
+            if wrappedContact.isKeyAvailable(CNContactOrganizationNameKey) {
+                return wrappedContact.organizationName
+            } else {
+                return nil
+            }
         }
         set {
             if let value = newValue {
                 wrappedContact.organizationName = value
-            } else {
-                wrappedContact.organizationName = ""
             }
         }
     }
     
     var phoneNumbers: [AddressBookRecordLabel]? {
         get {
-            return CNAdapter.convertCNLabeledValues(wrappedContact.phoneNumbers)
+            if wrappedContact.isKeyAvailable(CNContactPhoneNumbersKey) {
+                return CNAdapter.convertCNLabeledValues(wrappedContact.phoneNumbers)
+            } else {
+                return nil
+            }
+            
         }
         set {
             wrappedContact.phoneNumbers = CNAdapter.convertPhoneNumbers(newValue)
@@ -88,7 +119,11 @@ internal class CNContactRecord: ContactProtocol {
     
     var emailAddresses: [AddressBookRecordLabel]? {
         get {
-            return CNAdapter.convertCNLabeledValues(wrappedContact.emailAddresses)
+            if wrappedContact.isKeyAvailable(CNContactEmailAddressesKey) {
+                return CNAdapter.convertCNLabeledValues(wrappedContact.emailAddresses)
+            } else {
+                return nil
+            }
         }
         set {
             wrappedContact.emailAddresses = CNAdapter.convertEmailAddresses(emailAddresses)
@@ -98,6 +133,12 @@ internal class CNContactRecord: ContactProtocol {
 
 @available(iOS 9.0, *)
 internal class CNAdapter {
+    
+    internal class func convertCNContactsToContactRecords(cnContacts: [CNContact]) -> [ContactProtocol] {
+        return cnContacts.map({ (cnContact) -> ContactProtocol in
+            return CNContactRecord(cnContact: cnContact)
+        })
+    }
     
     internal class func convertContactValuesToCNContact(contact: ContactProtocol) -> CNMutableContact {
         let cnContact = CNMutableContact()
@@ -111,6 +152,10 @@ internal class CNAdapter {
         
         if let organizationName = contact.organizationName {
             cnContact.organizationName = organizationName
+        }
+        
+        if let middleName = contact.middleName {
+            cnContact.middleName = middleName
         }
        
         cnContact.phoneNumbers = convertPhoneNumbers(contact.phoneNumbers)

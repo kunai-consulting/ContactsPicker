@@ -19,6 +19,10 @@ public protocol ContactProtocol {
         get set
     }
     
+    var middleName: String? {
+        get set 
+    }
+    
     var lastName: String? {
         get set
     }
@@ -33,6 +37,26 @@ public protocol ContactProtocol {
     
     var organizationName: String? {
         get set
+    }
+}
+
+public extension ContactProtocol {
+    var fullName: String? {
+        get {
+            if firstName == nil && lastName == nil {
+                return nil
+            }
+            
+            if firstName != nil && lastName == nil {
+                return firstName
+            }
+            
+            if firstName == nil && lastName != nil {
+                return lastName
+            }
+            
+            return "\(firstName!) \(lastName!)"
+        }
     }
 }
 
