@@ -13,6 +13,7 @@ internal class CNAddressBookQueryBuilder: InternalAddressBookQueryBuilder<CNAddr
     
     let addressBookPropertiesToCNProperties: [AddressBookRecordProperty: String] = [
         AddressBookRecordProperty.FirstName : CNContactGivenNameKey,
+        AddressBookRecordProperty.MiddleName : CNContactMiddleNameKey,
         AddressBookRecordProperty.LastName : CNContactFamilyNameKey,
         AddressBookRecordProperty.EmailAddresses : CNContactEmailAddressesKey,
         AddressBookRecordProperty.OrganizationName : CNContactOrganizationNameKey,

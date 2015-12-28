@@ -19,6 +19,10 @@ public protocol ContactProtocol {
         get set
     }
     
+    var middleName: String? {
+        get set 
+    }
+    
     var lastName: String? {
         get set
     }

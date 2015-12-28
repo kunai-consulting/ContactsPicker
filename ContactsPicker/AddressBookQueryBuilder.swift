@@ -14,6 +14,7 @@ public typealias ContactResults = (results: [ContactProtocol]?, error: ErrorType
 public enum AddressBookRecordProperty {
     case Identifier
     case FirstName
+    case MiddleName
     case LastName
     case PhoneNumbers
     case EmailAddresses
@@ -22,6 +23,7 @@ public enum AddressBookRecordProperty {
     static let allValues = [
         AddressBookRecordProperty.Identifier,
         AddressBookRecordProperty.FirstName,
+        AddressBookRecordProperty.MiddleName,
         AddressBookRecordProperty.LastName,
         AddressBookRecordProperty.PhoneNumbers,
         AddressBookRecordProperty.EmailAddresses,

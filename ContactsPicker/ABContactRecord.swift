@@ -42,6 +42,16 @@ internal class ABContactRecord: ContactProtocol {
         }
     }
     
+    var middleName: String? {
+        get {
+            return ABRecordAdapter.getPropertyFromRecord(record, propertyName: kABPersonMiddleNameProperty)
+        }
+        
+        set {
+            ABRecordAdapter.setValueToRecord(record, key: kABPersonMiddleNameProperty, newValue as NSString?)
+        }
+    }
+    
     var lastName: String? {
         get {
             return ABRecordAdapter.getPropertyFromRecord(record, propertyName: kABPersonLastNameProperty)
@@ -129,6 +139,10 @@ internal class ABRecordAdapter {
         
         if let organizationName = contact.organizationName {
             setValueToRecord(person, key: kABPersonOrganizationProperty, organizationName as NSString)
+        }
+        
+        if let middleName = contact.middleName {
+            setValueToRecord(person, key: kABPersonMiddleNameProperty, middleName as NSString)
         }
         
         return person

@@ -57,6 +57,21 @@ internal class CNContactRecord: ContactProtocol {
         }
     }
     
+    var middleName: String? {
+        get {
+            if wrappedContact.isKeyAvailable(CNContactMiddleNameKey) {
+                return wrappedContact.middleName
+            } else {
+                return nil
+            }
+        }
+        set {
+            if let value = newValue {
+                wrappedContact.middleName = value
+            }
+        }
+    }
+    
     var lastName: String? {
         get {
             if wrappedContact.isKeyAvailable(CNContactFamilyNameKey) {
@@ -137,6 +152,10 @@ internal class CNAdapter {
         
         if let organizationName = contact.organizationName {
             cnContact.organizationName = organizationName
+        }
+        
+        if let middleName = contact.middleName {
+            cnContact.middleName = middleName
         }
        
         cnContact.phoneNumbers = convertPhoneNumbers(contact.phoneNumbers)

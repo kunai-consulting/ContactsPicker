@@ -16,6 +16,7 @@ internal class CNAddressBookImpl: AddressBookProtocol {
     private var saveRequest: CNSaveRequest = CNSaveRequest()
     private let defaultKeysToFetch = [
         CNContactGivenNameKey,
+        CNContactMiddleNameKey,
         CNContactFamilyNameKey,
         CNContactEmailAddressesKey,
         CNContactPhoneNumbersKey,

@@ -13,6 +13,7 @@ internal class ABAddressBookQueryBuilder: InternalAddressBookQueryBuilder<ABAddr
     
     let addressBookPropertiesToABProperties: [AddressBookRecordProperty: ABPropertyID] = [
         AddressBookRecordProperty.FirstName : kABPersonFirstNameProperty,
+        AddressBookRecordProperty.MiddleName : kABPersonMiddleNameProperty,
         AddressBookRecordProperty.LastName : kABPersonLastNameProperty,
         AddressBookRecordProperty.EmailAddresses : kABPersonEmailProperty,
         AddressBookRecordProperty.OrganizationName : kABPersonOrganizationProperty,

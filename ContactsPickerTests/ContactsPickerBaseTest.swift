@@ -103,6 +103,16 @@ public class ContactsPickerBaseTest : XCTestCase {
         XCTAssertNil(number2Label)
     }
     
+    func testSavingMiddleName() {
+        let contact = AddressBookRecord(firstName: "First", lastName: "Last")
+        contact.middleName = "middle"
+        let savedContact = try! addressBook.addContactToAddressBook(contact)
+        commitChanges()
+        
+        let fetchedContact = addressBook.findContactWithIdentifier(savedContact.identifier)
+        XCTAssertEqual("middle", fetchedContact?.middleName)
+    }
+    
     func testUpdatingContact() {
         let contact = addTestContact()
         commitChanges()
@@ -169,6 +179,7 @@ internal extension ContactsPickerBaseTest {
                 record.phoneNumbers = [AddressBookRecordLabel(label: .Home, value: "111")]
                 record.emailAddresses = [AddressBookRecordLabel(label: .Work, value: "test@mail.com")]
                 record.organizationName = "Organization"
+                record.middleName = "Middle"
                 try self.addressBook.addContactToAddressBook(record)
             }
         }
@@ -324,6 +335,9 @@ let mappings: [AddressBookRecordProperty: PropertyMapper] = [
     },
     AddressBookRecordProperty.LastName : { contact in
         return contact.lastName
+    },
+    AddressBookRecordProperty.MiddleName: { contact in
+        return contact.middleName
     },
     AddressBookRecordProperty.EmailAddresses : { contact in
         return contact.emailAddresses
