@@ -220,6 +220,7 @@ internal class CNAdapter {
     }
 }
 
+@available(iOS 9.0, *)
 internal extension CNLabeledValue {
     
     internal func valueAsString() -> String {

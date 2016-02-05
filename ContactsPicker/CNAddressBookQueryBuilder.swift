@@ -9,6 +9,7 @@
 import Foundation
 import Contacts
 
+@available(iOS 9.0, *)
 internal class CNAddressBookQueryBuilder: InternalAddressBookQueryBuilder<CNAddressBookImpl> {
     
     let addressBookPropertiesToCNProperties: [AddressBookRecordProperty: String] = [
