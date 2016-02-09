@@ -14,7 +14,7 @@
 Example:  
 ```
         do {
-            let ab = try MyAddressBook()
+            let ab = try AddressBook()
             ab.requestAccessToAddressBook({ (access, error) -> Void in
                 print("got accesss to address book!")
                 let contact = AddressBookRecord()
