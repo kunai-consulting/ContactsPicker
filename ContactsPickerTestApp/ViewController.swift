@@ -14,7 +14,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         do {
-            let ab = try MyAddressBook()
+            let ab = try AddressBook()
             ab.requestAccessToAddressBook({ (access, error) -> Void in
                 print("accesss")
                 let contact = AddressBookRecord()

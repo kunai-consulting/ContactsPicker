@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		8FDAE098D6282BDFAB295865 /* Pods_ContactsPickerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA91285F3F29FE9B29ECA974 /* Pods_ContactsPickerTests.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
-		AE13EF491C0347CA009E92E2 /* MyAddressBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE13EF481C0347CA009E92E2 /* MyAddressBook.swift */; };
+		AE13EF491C0347CA009E92E2 /* ContactsPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE13EF481C0347CA009E92E2 /* ContactsPicker.swift */; };
 		AE13EF4B1C0347F7009E92E2 /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AE13EF4A1C0347F6009E92E2 /* AddressBook.framework */; };
 		AE13EF4D1C034FE4009E92E2 /* Contacts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AE13EF4C1C034FE4009E92E2 /* Contacts.framework */; };
 		AE257F331C0DE7740026B9B1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE257F321C0DE7740026B9B1 /* AppDelegate.swift */; };
@@ -57,7 +57,7 @@
 /* Begin PBXFileReference section */
 		24143E78D31B74BC617ABAB7 /* Pods-ContactsPickerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ContactsPickerTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-ContactsPickerTests/Pods-ContactsPickerTests.release.xcconfig"; sourceTree = "<group>"; };
 		A1C7C2D2245BC02FFBC36EDC /* Pods-ContactsPickerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ContactsPickerTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ContactsPickerTests/Pods-ContactsPickerTests.debug.xcconfig"; sourceTree = "<group>"; };
-		AE13EF481C0347CA009E92E2 /* MyAddressBook.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyAddressBook.swift; sourceTree = "<group>"; };
+		AE13EF481C0347CA009E92E2 /* ContactsPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactsPicker.swift; sourceTree = "<group>"; };
 		AE13EF4A1C0347F6009E92E2 /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
 		AE13EF4C1C034FE4009E92E2 /* Contacts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Contacts.framework; path = System/Library/Frameworks/Contacts.framework; sourceTree = SDKROOT; };
 		AE257F301C0DE7740026B9B1 /* ContactsPickerTestApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ContactsPickerTestApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -211,7 +211,7 @@
 				AE257F4E1C0F2A170026B9B1 /* AddressBookFramework */,
 				AE8B643E1C033A6400A273F5 /* ContactsPicker.h */,
 				AE8B64401C033A6400A273F5 /* Info.plist */,
-				AE13EF481C0347CA009E92E2 /* MyAddressBook.swift */,
+				AE13EF481C0347CA009E92E2 /* ContactsPicker.swift */,
 				AE96419D1C047AE9003B4A47 /* ContactValues.swift */,
 				AE4D4A3F1C11BCF50006616A /* AddressBookRecord.swift */,
 				AEB788961C15B4DE00EF83D0 /* AddressBookQueryBuilder.swift */,
@@ -449,7 +449,7 @@
 				AEB788971C15B4DE00EF83D0 /* AddressBookQueryBuilder.swift in Sources */,
 				AE96419E1C047AE9003B4A47 /* ContactValues.swift in Sources */,
 				AE4D4A401C11BCF50006616A /* AddressBookRecord.swift in Sources */,
-				AE13EF491C0347CA009E92E2 /* MyAddressBook.swift in Sources */,
+				AE13EF491C0347CA009E92E2 /* ContactsPicker.swift in Sources */,
 				AE257F511C0F2A3B0026B9B1 /* CNContactRecord.swift in Sources */,
 				AE257F531C0F2A700026B9B1 /* ABContactRecord.swift in Sources */,
 				AE96419C1C04758B003B4A47 /* CNAddressBookImpl.swift in Sources */,

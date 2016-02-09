@@ -50,7 +50,7 @@ public class APIVersionAddressBookFactory : AddressBookFactory {
     }
 }
 
-public class MyAddressBook: AddressBookProtocol {
+public class AddressBook: AddressBookProtocol {
     private var internalAddressBook: AddressBookProtocol!
     
     public convenience init() throws {

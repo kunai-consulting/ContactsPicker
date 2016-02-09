@@ -12,7 +12,7 @@ import JPSimulatorHacks
 
 public class ContactsPickerBaseTest : XCTestCase {
     
-    internal var addressBook: MyAddressBook!
+    internal var addressBook: AddressBook!
     
     internal var factory: AddressBookFactory {
         get {
@@ -30,7 +30,7 @@ public class ContactsPickerBaseTest : XCTestCase {
     override public func setUp() {
         super.setUp()
         XCTempAssertNoThrowError { () -> () in
-            self.addressBook = try MyAddressBook(factory: self.factory)
+            self.addressBook = try AddressBook(factory: self.factory)
         }
         
         JPSimulatorHacks.grantAccessToAddressBook()
