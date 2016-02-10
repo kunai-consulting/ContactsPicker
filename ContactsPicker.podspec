@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
 
   s.source       = { :git => "https://github.com/kunai-consulting/ContactsPicker.git", :branch => "master", :tag => "0.0.1" }
 
-  s.source_files  = "Classes", "Classes/**/*.{h,m}"
+  s.source_files  = "ContactsPicker/**/*.{swift}", "ContactsPicker"
   s.exclude_files = "Classes/Exclude"
 
   s.frameworks = "Contacts", "AddressBook"
