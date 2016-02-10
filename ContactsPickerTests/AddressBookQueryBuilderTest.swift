@@ -11,7 +11,6 @@ import XCTest
 @testable import ContactsPicker
 import JPSimulatorHacks
 
-// TODO : move to generic XCTestCases ?
 internal class CNAddressBookQueryBuilderTest : XCTestCase {
 
     override func setUp() {
