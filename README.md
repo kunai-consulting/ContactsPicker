@@ -1,8 +1,8 @@
 # ContactsPicker
+Quick and easy way to access contacts from address book on >=iOS8.
 ## Setup
-1. Clone the project `git clone https://github.com/kunai-consulting/ContactsPicker`
-2. Run `pod install` in project's directory
-3. open `ContactsPicker.xcworkspace`
+Easiest way to install library is via cocoapods:  
+`pod 'ContactsPicker'`
 
 # API
 ## Basic usage
